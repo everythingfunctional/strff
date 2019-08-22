@@ -12,6 +12,11 @@ module strff
         module procedure joinS
     end interface join
 
+    interface lastCharacter
+        module procedure lastCharacterC
+        module procedure lastCharacterS
+    end interface lastCharacter
+
     interface splitAt
         module procedure splitAtCC
         module procedure splitAtCS
@@ -21,6 +26,7 @@ module strff
 
     interface toString
         module procedure toStringInteger
+        module procedure toStringWithSignificantDigits
     end interface toString
 
     character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
@@ -171,4 +177,116 @@ contains
         write(temp, '(I0)') number
         string = trim(temp)
     end function toStringInteger
+
+    pure function toStringWithSignificantDigits(number, significant_digits) result(string_)
+        use ISO_VARYING_STRING, only: &
+                VARYING_STRING, assignment(=), operator(//), len
+
+        double precision, intent(in) :: number
+        integer, intent(in) :: significant_digits
+        type(VARYING_STRING) :: string_
+
+        integer, parameter :: C_LEN = 32
+        double precision, parameter :: MACHINE_TINY = TINY(0.0D0)
+        double precision :: abs_num
+        character(len=C_LEN) :: exponent_part
+        character(len=C_LEN) :: floating_part
+        character(len=7) :: format_string
+        type(VARYING_STRING) :: intermediate
+        type(VARYING_STRING) :: intermediate_basic
+        type(VARYING_STRING) :: intermediate_scientific
+        integer :: scale_
+
+        abs_num = abs(number)
+        if (abs_num <= MACHINE_TINY) then
+            string_ = "0.0"
+            return
+        end if
+        scale_ = floor(log10(abs_num))
+        if (scale_ <= -2) then
+            write(format_string, '(A,I0,A)') "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) abs_num * 1.0D1**(-scale_)
+            write(exponent_part, '(A,I0)') 'e', scale_
+            intermediate = coverEmptyDecimal(removeTrailingZeros(floating_part)) // trim(exponent_part)
+        else
+            write(format_string, '(A,I0,A)') "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) abs_num / 1.0D1**scale_
+            write(exponent_part, '(A,I0)') 'e', scale_
+            intermediate_scientific = coverEmptyDecimal(removeTrailingZeros(floating_part)) // trim(exponent_part)
+
+            if (scale_ < significant_digits) then
+                write(format_string, '(A,I0,A)') "(f0.", significant_digits-scale_-1, ")"
+                write(floating_part, format_string) abs_num
+                intermediate_basic = coverEmptyDecimal(removeTrailingZeros(floating_part))
+
+                if (len(intermediate_scientific) < len(intermediate_basic)) then
+                    intermediate = intermediate_scientific
+                else
+                    intermediate = intermediate_basic
+                end if
+            else
+                intermediate = intermediate_scientific
+            end if
+        end if
+        if (number < 0.0D0) then
+            string_ = "-" // intermediate
+        else
+            string_ = intermediate
+        end if
+    end function toStringWithSignificantDigits
+
+    pure function removeTrailingZeros(number) result(trimmed)
+        use ISO_VARYING_STRING, only: &
+                VARYING_STRING, &
+                assignment(=), &
+                extract, &
+                len
+
+        character(len=*), intent(in) :: number
+        type(VARYING_STRING) :: trimmed
+
+        trimmed = trim(number)
+        do while (lastCharacter(trimmed) == "0")
+            trimmed = extract(trimmed, 1, len(trimmed) - 1)
+        end do
+    end function removeTrailingZeros
+
+    pure function lastCharacterC(string) result(char_)
+        character(len=*), intent(in) :: string
+        character(len=1) :: char_
+
+        integer :: length
+
+        length = len(trim(string))
+        char_ = string(length:length)
+    end function lastCharacterC
+
+    pure function lastCharacterS(string) result(char_)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        character(len=1) :: char_
+
+        char_ = lastCharacter(char(string))
+    end function lastCharacterS
+
+    pure function coverEmptyDecimal(number) result(fixed)
+        use ISO_VARYING_STRING, only: &
+                VARYING_STRING, &
+                assignment(=), &
+                operator(==), &
+                operator(//), &
+                extract
+
+        type(VARYING_STRING), intent(in) :: number
+        type(VARYING_STRING) :: fixed
+
+        if (lastCharacter(number) == ".") then
+            fixed = number // "0"
+        else if (extract(number, 1, 1) == ".") then
+            fixed = "0" // number
+        else
+            fixed = number
+        end if
+    end function coverEmptyDecimal
 end module strff
