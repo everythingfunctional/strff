@@ -25,6 +25,7 @@ module strff
     end interface splitAt
 
     interface toString
+        module procedure toStringDouble
         module procedure toStringInteger
         module procedure toStringWithSignificantDigits
     end interface toString
@@ -165,6 +166,15 @@ contains
 
         allocate(strings, source = splitAt(char(string), char(split_characters)))
     end function splitAtSS
+
+    pure function toStringDouble(number) result(string)
+        use ISO_VARYING_STRING, only: VARYING_STRING
+
+        double precision, intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        string = toString(number, 16)
+    end function toStringDouble
 
     pure function toStringInteger(number) result(string)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)

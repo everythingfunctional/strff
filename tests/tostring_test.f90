@@ -50,8 +50,8 @@ contains
         type(Result_t) :: result_
 
         result_ = &
-                assertEquals("1.0", toString(1.0D0, 6)) &
-                .and.assertEquals("10.0", toString(1.0D1, 6))
+                assertEquals("1.0", toString(1.0D0)) &
+                .and.assertEquals("10.0", toString(1.0D1))
     end function checkIncludesZeroAfterDecimal
 
     pure function checkOnlyKeepsSixDigits() result(result_)
@@ -80,8 +80,8 @@ contains
         double precision, parameter :: MACHINE_TINY = TINY(0.0D0)
 
         result_ = &
-                assertEquals("0.0", toString(0.0D0, 6)) &
-                .and.assertEquals("0.0", toString(MACHINE_TINY, 6))
+                assertEquals("0.0", toString(0.0D0)) &
+                .and.assertEquals("0.0", toString(MACHINE_TINY))
     end function checkHandlesZero
 
     pure function checkHandlesExtremeNumbers() result(result_)
@@ -126,7 +126,7 @@ contains
         type(Result_t) :: result_
 
         result_ = &
-                assertEquals("1.0e6", toString(1.0D6, 16))
+                assertEquals("1.0e6", toString(1.0D6))
     end function checkRoundNumbers
 
     pure function checkToStringForIntegers() result(result_)
