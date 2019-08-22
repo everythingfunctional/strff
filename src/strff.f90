@@ -2,9 +2,16 @@ module strff
     implicit none
     private
 
+    interface splitAt
+        module procedure splitAtCC
+        module procedure splitAtCS
+        module procedure splitAtSC
+        module procedure splitAtSS
+    end interface splitAt
+
     public :: splitAt
 contains
-    pure recursive function splitAt(string, split_characters) result(strings)
+    pure recursive function splitAtCC(string, split_characters) result(strings)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
 
         character(len=*), intent(in) :: string
@@ -57,5 +64,35 @@ contains
                 strings_(1) = string_
             end if
         end function doSplit
-    end function splitAt
+    end function splitAtCC
+
+    pure function splitAtCS(string, split_characters) result(strings)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        character(len=*), intent(in) :: string
+        type(VARYING_STRING), intent(in) :: split_characters
+        type(VARYING_STRING), allocatable :: strings(:)
+
+        allocate(strings, source = splitAt(string, char(split_characters)))
+    end function splitAtCS
+
+    pure function splitAtSC(string, split_characters) result(strings)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        character(len=*), intent(in) :: split_characters
+        type(VARYING_STRING), allocatable :: strings(:)
+
+        allocate(strings, source = splitAt(char(string), split_characters))
+    end function splitAtSC
+
+    pure function splitAtSS(string, split_characters) result(strings)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        type(VARYING_STRING), intent(in) :: split_characters
+        type(VARYING_STRING), allocatable :: strings(:)
+
+        allocate(strings, source = splitAt(char(string), char(split_characters)))
+    end function splitAtSS
 end module strff
