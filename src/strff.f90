@@ -2,6 +2,11 @@ module strff
     implicit none
     private
 
+    interface join
+        module procedure joinC
+        module procedure joinS
+    end interface join
+
     interface splitAt
         module procedure splitAtCC
         module procedure splitAtCS
@@ -9,8 +14,33 @@ module strff
         module procedure splitAtSS
     end interface splitAt
 
-    public :: splitAt
+    public :: join, splitAt
 contains
+    pure function joinC(strings, separator) result(string)
+        use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
+
+        type(VARYING_STRING), intent(in) :: strings(:)
+        character(len=*), intent(in) :: separator
+        type(VARYING_STRING) :: string
+
+        string = join(strings, VAR_STR(separator))
+    end function joinC
+
+    pure function joinS(strings, separator) result(string)
+        use ISO_VARYING_STRING, only: VARYING_STRING, operator(//)
+
+        type(VARYING_STRING), intent(in) :: strings(:)
+        type(VARYING_STRING), intent(in) :: separator
+        type(VARYING_STRING) :: string
+
+        integer :: i
+
+        string = strings(1)
+        do i = 2, size(strings)
+            string = string // separator // strings(i)
+        end do
+    end function joinS
+
     pure recursive function splitAtCC(string, split_characters) result(strings)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
 
