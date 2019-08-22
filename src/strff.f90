@@ -19,9 +19,13 @@ module strff
         module procedure splitAtSS
     end interface splitAt
 
+    interface toString
+        module procedure toStringInteger
+    end interface toString
+
     character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
 
-    public :: hangingIndent, join, splitAt
+    public :: hangingIndent, join, splitAt, toString
 contains
     pure function hangingIndentC(string, spaces) result(indented)
         use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
@@ -155,4 +159,16 @@ contains
 
         allocate(strings, source = splitAt(char(string), char(split_characters)))
     end function splitAtSS
+
+    pure function toStringInteger(number) result(string)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        integer, intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        character(len=32) :: temp
+
+        write(temp, '(I0)') number
+        string = trim(temp)
+    end function toStringInteger
 end module strff
