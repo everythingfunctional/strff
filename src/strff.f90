@@ -7,6 +7,11 @@ module strff
         module procedure hangingIndentS
     end interface hangingIndent
 
+    interface indent
+        module procedure indentC
+        module procedure indentS
+    end interface indent
+
     interface join
         module procedure joinC
         module procedure joinS
@@ -32,7 +37,7 @@ module strff
 
     character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
 
-    public :: hangingIndent, join, splitAt, toString
+    public :: hangingIndent, indent, join, splitAt, toString
 contains
     pure function hangingIndentC(string, spaces) result(indented)
         use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
@@ -56,6 +61,26 @@ contains
         allocate(lines, source = splitAt(string, NEWLINE))
         indented = join(lines, NEWLINE // repeat(" ", spaces))
     end function hangingIndentS
+
+    pure function indentC(string, spaces) result(indented)
+        use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
+
+        character(len=*), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(VARYING_STRING) :: indented
+
+        indented = indent(VAR_STR(string), spaces)
+    end function indentC
+
+    pure function indentS(string, spaces) result(indented)
+        use ISO_VARYING_STRING, only: VARYING_STRING, operator(//)
+
+        type(VARYING_STRING), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(VARYING_STRING) :: indented
+
+        indented = repeat(" ", spaces) // hangingIndent(string, spaces)
+    end function indentS
 
     pure function joinC(strings, separator) result(string)
         use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
