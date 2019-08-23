@@ -2,6 +2,13 @@ module strff
     implicit none
     private
 
+    interface operator(.includes.)
+        module procedure includesCC
+        module procedure includesCS
+        module procedure includesSC
+        module procedure includesSS
+    end interface operator(.includes.)
+
     interface coverEmptyDecimal
         module procedure coverEmptyDecimalC
         module procedure coverEmptyDecimalS
@@ -16,6 +23,13 @@ module strff
         module procedure hangingIndentC
         module procedure hangingIndentS
     end interface hangingIndent
+
+    interface includes
+        module procedure includesCC
+        module procedure includesCS
+        module procedure includesSC
+        module procedure includesSS
+    end interface includes
 
     interface indent
         module procedure indentC
@@ -63,9 +77,11 @@ module strff
     character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
 
     public :: &
+            operator(.includes.), &
             coverEmptyDecimal, &
             firstCharacter, &
             hangingIndent, &
+            includes, &
             indent, &
             join, &
             lastCharacter, &
@@ -138,6 +154,44 @@ contains
         indented = join(lines, NEWLINE // repeat(" ", spaces))
     end function hangingIndentS
 
+    pure function includesCC(within, search_for)
+        character(len=*), intent(in) :: within
+        character(len=*), intent(in) :: search_for
+        logical :: includesCC
+
+        includesCC = index(within, search_for) > 0
+    end function includesCC
+
+    pure function includesCS(within, search_for)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        character(len=*), intent(in) :: within
+        type(VARYING_STRING), intent(in) :: search_for
+        logical :: includesCS
+
+        includesCS = within.includes.char(search_for)
+    end function includesCS
+
+    pure function includesSC(within, search_for)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: within
+        character(len=*), intent(in) :: search_for
+        logical :: includesSC
+
+        includesSC = char(within).includes.search_for
+    end function includesSC
+
+    pure function includesSS(within, search_for)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: within
+        type(VARYING_STRING), intent(in) :: search_for
+        logical :: includesSS
+
+        includesSS = char(within).includes.char(search_for)
+    end function includesSS
+
     pure function indentC(string, spaces) result(indented)
         use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
 
@@ -169,7 +223,8 @@ contains
     end function joinC
 
     pure recursive function joinS(strings, separator) result(string)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=), operator(//)
+        use ISO_VARYING_STRING, only: &
+                VARYING_STRING, assignment(=), operator(//)
 
         type(VARYING_STRING), intent(in) :: strings(:)
         type(VARYING_STRING), intent(in) :: separator
@@ -183,7 +238,10 @@ contains
         else if (num_strings == 0) then
             string = ""
         else
-            string = strings(1) // separator // join(strings(2:), separator)
+            string = &
+                    strings(1) &
+                    // separator &
+                    // join(strings(2:), separator)
         end if
     end function joinS
 
@@ -228,24 +286,27 @@ contains
         trimmed = removeTrailingZeros(char(number))
     end function removeTrailingZerosS
 
-    pure recursive function splitAtCC(string, split_characters) result(strings)
+    pure recursive function splitAtCC( &
+            string, split_characters) result(strings)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
 
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(VARYING_STRING), allocatable :: strings(:)
 
-        integer :: string_length
-
         if (len(split_characters) > 0) then
-            string_length = len(string)
-            if (string_length > 0) then
-                if (index(split_characters, string(1:1)) > 0) then
-                    allocate(strings, source = splitAt(string(2:), split_characters))
-                else if (index(split_characters, string(string_length:string_length)) > 0) then
-                    allocate(strings, source = splitAt(string(1:string_length - 1), split_characters))
+            if (len(string) > 0) then
+                if (split_characters.includes.firstCharacter(string)) then
+                    allocate(strings, source = splitAt( &
+                            withoutFirstCharacter(string), &
+                            split_characters))
+                else if (split_characters.includes.lastCharacter(string)) then
+                    allocate(strings, source = splitAt( &
+                            withoutLastCharacter(string), &
+                            split_characters))
                 else
-                    allocate(strings, source = doSplit(string, split_characters))
+                    allocate(strings, source = &
+                        doSplit(string, split_characters))
                 end if
             else
                 allocate(strings(0))
@@ -267,11 +328,12 @@ contains
 
             string_length_ = len(string_)
             do i = 2, string_length_
-                if (index(split_characters_, string_(i:i)) > 0) exit
+                if (split_characters_.includes.string_(i:i)) exit
             end do
             if (i < string_length_) then
                 this_string = string_(1:i - 1)
-                allocate(rest, source = splitAt(string_(i + 1:), split_characters_))
+                allocate(rest, source = &
+                        splitAt(string_(i + 1:), split_characters_))
                 allocate(strings_(size(rest) + 1))
                 strings_(1) = this_string
                 strings_(2:) = rest(:)
@@ -333,7 +395,8 @@ contains
         string = trim(temp)
     end function toStringInteger
 
-    pure function toStringWithSignificantDigits(number, significant_digits) result(string_)
+    pure function toStringWithSignificantDigits( &
+            number, significant_digits) result(string_)
         use ISO_VARYING_STRING, only: &
                 VARYING_STRING, assignment(=), operator(//), len
 
@@ -359,20 +422,31 @@ contains
         end if
         scale_ = floor(log10(abs_num))
         if (scale_ <= -2) then
-            write(format_string, '(A,I0,A)') "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) abs_num * 1.0D1**(-scale_)
+            write(format_string, '(A,I0,A)') &
+                    "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) &
+                    abs_num * 1.0D1**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate = coverEmptyDecimal(removeTrailingZeros(trim(floating_part))) // trim(exponent_part)
+            intermediate = &
+                    coverEmptyDecimal( &
+                            removeTrailingZeros(trim(floating_part))) &
+                    // trim(exponent_part)
         else
-            write(format_string, '(A,I0,A)') "(f0.", significant_digits-1, ")"
+            write(format_string, '(A,I0,A)') &
+                    "(f0.", significant_digits-1, ")"
             write(floating_part, format_string) abs_num / 1.0D1**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate_scientific = coverEmptyDecimal(removeTrailingZeros(trim(floating_part))) // trim(exponent_part)
+            intermediate_scientific = &
+                    coverEmptyDecimal( &
+                            removeTrailingZeros(trim(floating_part))) &
+                    // trim(exponent_part)
 
             if (scale_ < significant_digits) then
-                write(format_string, '(A,I0,A)') "(f0.", significant_digits-scale_-1, ")"
+                write(format_string, '(A,I0,A)') &
+                        "(f0.", significant_digits-scale_-1, ")"
                 write(floating_part, format_string) abs_num
-                intermediate_basic = coverEmptyDecimal(removeTrailingZeros(trim(floating_part)))
+                intermediate_basic = coverEmptyDecimal( &
+                        removeTrailingZeros(trim(floating_part)))
 
                 if (len(intermediate_scientific) < len(intermediate_basic)) then
                     intermediate = intermediate_scientific
