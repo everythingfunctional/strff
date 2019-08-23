@@ -50,6 +50,16 @@ module strff
         module procedure toStringWithSignificantDigits
     end interface toString
 
+    interface withoutFirstCharacter
+        module procedure withoutFirstCharacterC
+        module procedure withoutFirstCharacterS
+    end interface withoutFirstCharacter
+
+    interface withoutLastCharacter
+        module procedure withoutLastCharacterC
+        module procedure withoutLastCharacterS
+    end interface withoutLastCharacter
+
     character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
 
     public :: &
@@ -61,7 +71,9 @@ module strff
             lastCharacter, &
             removeTrailingZeros, &
             splitAt, &
-            toString
+            toString, &
+            withoutFirstCharacter, &
+            withoutLastCharacter
 contains
     pure function coverEmptyDecimalC(number) result(fixed)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
@@ -194,17 +206,14 @@ contains
         char_ = lastCharacter(char(string))
     end function lastCharacterS
 
-    pure recursive function removeTrailingZerosC(number) result(trimmed)
+    pure function removeTrailingZerosC(number) result(trimmed)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
 
         character(len=*), intent(in) :: number
         type(VARYING_STRING) :: trimmed
 
-        integer :: length
-
         if (lastCharacter(number) == "0") then
-            length = len(number)
-            trimmed = removeTrailingZeros(number(1:length - 1))
+            trimmed = removeTrailingZeros(withoutLastCharacter(number))
         else
             trimmed = number
         end if
@@ -380,4 +389,40 @@ contains
             string_ = intermediate
         end if
     end function toStringWithSignificantDigits
+
+    pure function withoutFirstCharacterC(string) result(trimmed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        character(len=*), intent(in) :: string
+        type(VARYING_STRING) :: trimmed
+
+        trimmed = string(2:)
+    end function withoutFirstCharacterC
+
+    pure function withoutFirstCharacterS(string) result(trimmed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        type(VARYING_STRING) :: trimmed
+
+        trimmed = withoutFirstCharacter(char(string))
+    end function withoutFirstCharacterS
+
+    pure function withoutLastCharacterC(string) result(trimmed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        character(len=*), intent(in) :: string
+        type(VARYING_STRING) :: trimmed
+
+        trimmed = string(1:len(string) - 1)
+    end function withoutLastCharacterC
+
+    pure function withoutLastCharacterS(string) result(trimmed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        type(VARYING_STRING) :: trimmed
+
+        trimmed = withoutLastCharacter(char(string))
+    end function withoutLastCharacterS
 end module strff
