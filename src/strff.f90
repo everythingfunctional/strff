@@ -2,6 +2,16 @@ module strff
     implicit none
     private
 
+    interface coverEmptyDecimal
+        module procedure coverEmptyDecimalC
+        module procedure coverEmptyDecimalS
+    end interface coverEmptyDecimal
+
+    interface firstCharacter
+        module procedure firstCharacterC
+        module procedure firstCharacterS
+    end interface firstCharacter
+
     interface hangingIndent
         module procedure hangingIndentC
         module procedure hangingIndentS
@@ -22,6 +32,11 @@ module strff
         module procedure lastCharacterS
     end interface lastCharacter
 
+    interface removeTrailingZeros
+        module procedure removeTrailingZerosC
+        module procedure removeTrailingZerosS
+    end interface removeTrailingZeros
+
     interface splitAt
         module procedure splitAtCC
         module procedure splitAtCS
@@ -37,8 +52,57 @@ module strff
 
     character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
 
-    public :: hangingIndent, indent, join, splitAt, toString
+    public :: &
+            coverEmptyDecimal, &
+            firstCharacter, &
+            hangingIndent, &
+            indent, &
+            join, &
+            lastCharacter, &
+            removeTrailingZeros, &
+            splitAt, &
+            toString
 contains
+    pure function coverEmptyDecimalC(number) result(fixed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        character(len=*), intent(in) :: number
+        type(VARYING_STRING) :: fixed
+
+        if (lastCharacter(number) == ".") then
+            fixed = number // "0"
+        else if (firstCharacter(number) == ".") then
+            fixed = "0" // number
+        else
+            fixed = number
+        end if
+    end function coverEmptyDecimalC
+
+    pure function coverEmptyDecimalS(number) result(fixed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: number
+        type(VARYING_STRING) :: fixed
+
+        fixed = coverEmptyDecimal(char(number))
+    end function coverEmptyDecimalS
+
+    pure function firstCharacterC(string) result(char_)
+        character(len=*), intent(in) :: string
+        character(len=1) :: char_
+
+        char_ = string(1:1)
+    end function firstCharacterC
+
+    pure function firstCharacterS(string) result(char_)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        character(len=1) :: char_
+
+        char_ = firstCharacter(char(string))
+    end function firstCharacterS
+
     pure function hangingIndentC(string, spaces) result(indented)
         use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
 
@@ -110,6 +174,50 @@ contains
             string = strings(1) // separator // join(strings(2:), separator)
         end if
     end function joinS
+
+    pure function lastCharacterC(string) result(char_)
+        character(len=*), intent(in) :: string
+        character(len=1) :: char_
+
+        integer :: length
+
+        length = len(string)
+        char_ = string(length:length)
+    end function lastCharacterC
+
+    pure function lastCharacterS(string) result(char_)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: string
+        character(len=1) :: char_
+
+        char_ = lastCharacter(char(string))
+    end function lastCharacterS
+
+    pure recursive function removeTrailingZerosC(number) result(trimmed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        character(len=*), intent(in) :: number
+        type(VARYING_STRING) :: trimmed
+
+        integer :: length
+
+        if (lastCharacter(number) == "0") then
+            length = len(number)
+            trimmed = removeTrailingZeros(number(1:length - 1))
+        else
+            trimmed = number
+        end if
+    end function removeTrailingZerosC
+
+    pure function removeTrailingZerosS(number) result(trimmed)
+        use ISO_VARYING_STRING, only: VARYING_STRING, char
+
+        type(VARYING_STRING), intent(in) :: number
+        type(VARYING_STRING) :: trimmed
+
+        trimmed = removeTrailingZeros(char(number))
+    end function removeTrailingZerosS
 
     pure recursive function splitAtCC(string, split_characters) result(strings)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
@@ -245,17 +353,17 @@ contains
             write(format_string, '(A,I0,A)') "(f0.", significant_digits-1, ")"
             write(floating_part, format_string) abs_num * 1.0D1**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate = coverEmptyDecimal(removeTrailingZeros(floating_part)) // trim(exponent_part)
+            intermediate = coverEmptyDecimal(removeTrailingZeros(trim(floating_part))) // trim(exponent_part)
         else
             write(format_string, '(A,I0,A)') "(f0.", significant_digits-1, ")"
             write(floating_part, format_string) abs_num / 1.0D1**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate_scientific = coverEmptyDecimal(removeTrailingZeros(floating_part)) // trim(exponent_part)
+            intermediate_scientific = coverEmptyDecimal(removeTrailingZeros(trim(floating_part))) // trim(exponent_part)
 
             if (scale_ < significant_digits) then
                 write(format_string, '(A,I0,A)') "(f0.", significant_digits-scale_-1, ")"
                 write(floating_part, format_string) abs_num
-                intermediate_basic = coverEmptyDecimal(removeTrailingZeros(floating_part))
+                intermediate_basic = coverEmptyDecimal(removeTrailingZeros(trim(floating_part)))
 
                 if (len(intermediate_scientific) < len(intermediate_basic)) then
                     intermediate = intermediate_scientific
@@ -272,59 +380,4 @@ contains
             string_ = intermediate
         end if
     end function toStringWithSignificantDigits
-
-    pure function removeTrailingZeros(number) result(trimmed)
-        use ISO_VARYING_STRING, only: &
-                VARYING_STRING, &
-                assignment(=), &
-                extract, &
-                len
-
-        character(len=*), intent(in) :: number
-        type(VARYING_STRING) :: trimmed
-
-        trimmed = trim(number)
-        do while (lastCharacter(trimmed) == "0")
-            trimmed = extract(trimmed, 1, len(trimmed) - 1)
-        end do
-    end function removeTrailingZeros
-
-    pure function lastCharacterC(string) result(char_)
-        character(len=*), intent(in) :: string
-        character(len=1) :: char_
-
-        integer :: length
-
-        length = len(trim(string))
-        char_ = string(length:length)
-    end function lastCharacterC
-
-    pure function lastCharacterS(string) result(char_)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
-        type(VARYING_STRING), intent(in) :: string
-        character(len=1) :: char_
-
-        char_ = lastCharacter(char(string))
-    end function lastCharacterS
-
-    pure function coverEmptyDecimal(number) result(fixed)
-        use ISO_VARYING_STRING, only: &
-                VARYING_STRING, &
-                assignment(=), &
-                operator(==), &
-                operator(//), &
-                extract
-
-        type(VARYING_STRING), intent(in) :: number
-        type(VARYING_STRING) :: fixed
-
-        if (lastCharacter(number) == ".") then
-            fixed = number // "0"
-        else if (extract(number, 1, 1) == ".") then
-            fixed = "0" // number
-        else
-            fixed = number
-        end if
-    end function coverEmptyDecimal
 end module strff
