@@ -106,8 +106,7 @@ contains
                     allocate(strings, source = doSplit(string, split_characters))
                 end if
             else
-                allocate(strings(1))
-                strings(1) = ""
+                allocate(strings(0))
             end if
         else
             allocate(strings(1))
