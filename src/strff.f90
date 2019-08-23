@@ -67,19 +67,23 @@ contains
         string = join(strings, VAR_STR(separator))
     end function joinC
 
-    pure function joinS(strings, separator) result(string)
-        use ISO_VARYING_STRING, only: VARYING_STRING, operator(//)
+    pure recursive function joinS(strings, separator) result(string)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=), operator(//)
 
         type(VARYING_STRING), intent(in) :: strings(:)
         type(VARYING_STRING), intent(in) :: separator
         type(VARYING_STRING) :: string
 
-        integer :: i
+        integer :: num_strings
 
-        string = strings(1)
-        do i = 2, size(strings)
-            string = string // separator // strings(i)
-        end do
+        num_strings = size(strings)
+        if (num_strings == 1) then
+            string = strings(1)
+        else if (num_strings == 0) then
+            string = ""
+        else
+            string = strings(1) // separator // join(strings(2:), separator)
+        end if
     end function joinS
 
     pure recursive function splitAtCC(string, split_characters) result(strings)
