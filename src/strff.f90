@@ -63,6 +63,7 @@ module strff
         module procedure toStringInt16
         module procedure toStringInt32
         module procedure toStringInt64
+        module procedure toStringLogical
         module procedure toStringReal32
         module procedure toStringReal64
         ! module procedure toStringReal128
@@ -432,6 +433,19 @@ contains
         write(temp, '(I0)') number
         string = trim(temp)
     end function toStringInt64
+
+    pure function toStringLogical(logical_) result(string)
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        logical, intent(in) :: logical_
+        type(VARYING_STRING) :: string
+
+        if (logical_) then
+            string = "TRUE"
+        else
+            string = "FALSE"
+        end if
+    end function toStringLogical
 
     pure function toStringReal32(number) result(string)
         use ISO_FORTRAN_ENV, only: REAL32
