@@ -59,9 +59,16 @@ module strff
     end interface splitAt
 
     interface toString
-        module procedure toStringDouble
-        module procedure toStringInteger
-        module procedure toStringWithSignificantDigits
+        module procedure toStringInt8
+        module procedure toStringInt16
+        module procedure toStringInt32
+        module procedure toStringInt64
+        module procedure toStringReal32
+        module procedure toStringReal64
+        module procedure toStringReal128
+        module procedure toStringWithSignificantDigitsReal32
+        module procedure toStringWithSignificantDigitsReal64
+        module procedure toStringWithSignificantDigitsReal128
     end interface toString
 
     interface withoutFirstCharacter
@@ -374,39 +381,101 @@ contains
         allocate(strings, source = splitAt(char(string), char(split_characters)))
     end function splitAtSS
 
-    pure function toStringDouble(number) result(string)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-
-        double precision, intent(in) :: number
-        type(VARYING_STRING) :: string
-
-        string = toString(number, 16)
-    end function toStringDouble
-
-    pure function toStringInteger(number) result(string)
+    pure function toStringInt8(number) result(string)
+        use ISO_FORTRAN_ENV, only: INT8
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
 
-        integer, intent(in) :: number
+        integer(INT8), intent(in) :: number
         type(VARYING_STRING) :: string
 
-        character(len=32) :: temp
+        character(len=4) :: temp
 
         write(temp, '(I0)') number
         string = trim(temp)
-    end function toStringInteger
+    end function toStringInt8
 
-    pure function toStringWithSignificantDigits( &
+    pure function toStringInt16(number) result(string)
+        use ISO_FORTRAN_ENV, only: INT16
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        integer(INT16), intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        character(len=6) :: temp
+
+        write(temp, '(I0)') number
+        string = trim(temp)
+    end function toStringInt16
+
+    pure function toStringInt32(number) result(string)
+        use ISO_FORTRAN_ENV, only: INT32
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        integer(INT32), intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        character(len=11) :: temp
+
+        write(temp, '(I0)') number
+        string = trim(temp)
+    end function toStringInt32
+
+    pure function toStringInt64(number) result(string)
+        use ISO_FORTRAN_ENV, only: INT64
+        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+
+        integer(INT64), intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        character(len=20) :: temp
+
+        write(temp, '(I0)') number
+        string = trim(temp)
+    end function toStringInt64
+
+    pure function toStringReal32(number) result(string)
+        use ISO_FORTRAN_ENV, only: REAL32
+        use ISO_VARYING_STRING, only: VARYING_STRING
+
+        real(REAL32), intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        string = toString(number, 9)
+    end function toStringReal32
+
+    pure function toStringReal64(number) result(string)
+        use ISO_FORTRAN_ENV, only: REAL64
+        use ISO_VARYING_STRING, only: VARYING_STRING
+
+        real(REAL64), intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        string = toString(number, 17)
+    end function toStringReal64
+
+    pure function toStringReal128(number) result(string)
+        use ISO_FORTRAN_ENV, only: REAL128
+        use ISO_VARYING_STRING, only: VARYING_STRING
+
+        real(REAL128), intent(in) :: number
+        type(VARYING_STRING) :: string
+
+        string = toString(number, 36)
+    end function toStringReal128
+
+    pure function toStringWithSignificantDigitsReal32( &
             number, significant_digits) result(string_)
+        use ISO_FORTRAN_ENV, only: REAL32
         use ISO_VARYING_STRING, only: &
                 VARYING_STRING, assignment(=), operator(//), len
 
-        double precision, intent(in) :: number
+        real(REAL32), intent(in) :: number
         integer, intent(in) :: significant_digits
         type(VARYING_STRING) :: string_
 
-        integer, parameter :: C_LEN = 32
-        double precision, parameter :: MACHINE_TINY = TINY(0.0D0)
-        double precision :: abs_num
+        integer, parameter :: C_LEN = 18
+        real(REAL32), parameter :: MACHINE_TINY = TINY(real(0.0, kind=REAL32))
+        real(REAL32) :: abs_num
         character(len=C_LEN) :: exponent_part
         character(len=C_LEN) :: floating_part
         character(len=7) :: format_string
@@ -462,7 +531,147 @@ contains
         else
             string_ = intermediate
         end if
-    end function toStringWithSignificantDigits
+    end function toStringWithSignificantDigitsReal32
+
+    pure function toStringWithSignificantDigitsReal64( &
+            number, significant_digits) result(string_)
+        use ISO_FORTRAN_ENV, only: REAL64
+        use ISO_VARYING_STRING, only: &
+                VARYING_STRING, assignment(=), operator(//), len
+
+        real(REAL64), intent(in) :: number
+        integer, intent(in) :: significant_digits
+        type(VARYING_STRING) :: string_
+
+        integer, parameter :: C_LEN = 34
+        real(REAL64), parameter :: MACHINE_TINY = TINY(real(0.0, kind=REAL64))
+        real(REAL64) :: abs_num
+        character(len=C_LEN) :: exponent_part
+        character(len=C_LEN) :: floating_part
+        character(len=7) :: format_string
+        type(VARYING_STRING) :: intermediate
+        type(VARYING_STRING) :: intermediate_basic
+        type(VARYING_STRING) :: intermediate_scientific
+        integer :: scale_
+
+        abs_num = abs(number)
+        if (abs_num <= MACHINE_TINY) then
+            string_ = "0.0"
+            return
+        end if
+        scale_ = floor(log10(abs_num))
+        if (scale_ <= -2) then
+            write(format_string, '(A,I0,A)') &
+                    "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) &
+                    abs_num * 1.0D1**(-scale_)
+            write(exponent_part, '(A,I0)') 'e', scale_
+            intermediate = &
+                    coverEmptyDecimal( &
+                            removeTrailingZeros(trim(floating_part))) &
+                    // trim(exponent_part)
+        else
+            write(format_string, '(A,I0,A)') &
+                    "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) abs_num / 1.0D1**scale_
+            write(exponent_part, '(A,I0)') 'e', scale_
+            intermediate_scientific = &
+                    coverEmptyDecimal( &
+                            removeTrailingZeros(trim(floating_part))) &
+                    // trim(exponent_part)
+
+            if (scale_ < significant_digits) then
+                write(format_string, '(A,I0,A)') &
+                        "(f0.", significant_digits-scale_-1, ")"
+                write(floating_part, format_string) abs_num
+                intermediate_basic = coverEmptyDecimal( &
+                        removeTrailingZeros(trim(floating_part)))
+
+                if (len(intermediate_scientific) < len(intermediate_basic)) then
+                    intermediate = intermediate_scientific
+                else
+                    intermediate = intermediate_basic
+                end if
+            else
+                intermediate = intermediate_scientific
+            end if
+        end if
+        if (number < 0.0D0) then
+            string_ = "-" // intermediate
+        else
+            string_ = intermediate
+        end if
+    end function toStringWithSignificantDigitsReal64
+
+    pure function toStringWithSignificantDigitsReal128( &
+            number, significant_digits) result(string_)
+        use ISO_FORTRAN_ENV, only: REAL128
+        use ISO_VARYING_STRING, only: &
+                VARYING_STRING, assignment(=), operator(//), len
+
+        real(REAL128), intent(in) :: number
+        integer, intent(in) :: significant_digits
+        type(VARYING_STRING) :: string_
+
+        integer, parameter :: C_LEN = 72
+        real(REAL128), parameter :: MACHINE_TINY = TINY(real(0.0, kind=REAL128))
+        real(REAL128) :: abs_num
+        character(len=C_LEN) :: exponent_part
+        character(len=C_LEN) :: floating_part
+        character(len=7) :: format_string
+        type(VARYING_STRING) :: intermediate
+        type(VARYING_STRING) :: intermediate_basic
+        type(VARYING_STRING) :: intermediate_scientific
+        integer :: scale_
+
+        abs_num = abs(number)
+        if (abs_num <= MACHINE_TINY) then
+            string_ = "0.0"
+            return
+        end if
+        scale_ = floor(log10(abs_num))
+        if (scale_ <= -2) then
+            write(format_string, '(A,I0,A)') &
+                    "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) &
+                    abs_num * 1.0D1**(-scale_)
+            write(exponent_part, '(A,I0)') 'e', scale_
+            intermediate = &
+                    coverEmptyDecimal( &
+                            removeTrailingZeros(trim(floating_part))) &
+                    // trim(exponent_part)
+        else
+            write(format_string, '(A,I0,A)') &
+                    "(f0.", significant_digits-1, ")"
+            write(floating_part, format_string) abs_num / 1.0D1**scale_
+            write(exponent_part, '(A,I0)') 'e', scale_
+            intermediate_scientific = &
+                    coverEmptyDecimal( &
+                            removeTrailingZeros(trim(floating_part))) &
+                    // trim(exponent_part)
+
+            if (scale_ < significant_digits) then
+                write(format_string, '(A,I0,A)') &
+                        "(f0.", significant_digits-scale_-1, ")"
+                write(floating_part, format_string) abs_num
+                intermediate_basic = coverEmptyDecimal( &
+                        removeTrailingZeros(trim(floating_part)))
+
+                if (len(intermediate_scientific) < len(intermediate_basic)) then
+                    intermediate = intermediate_scientific
+                else
+                    intermediate = intermediate_basic
+                end if
+            else
+                intermediate = intermediate_scientific
+            end if
+        end if
+        if (number < 0.0D0) then
+            string_ = "-" // intermediate
+        else
+            string_ = intermediate
+        end if
+    end function toStringWithSignificantDigitsReal128
 
     pure function withoutFirstCharacterC(string) result(trimmed)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
