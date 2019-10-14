@@ -19,7 +19,7 @@ contains
         tests = describe("join", individual_tests)
     end function test_join
 
-    pure function checkJoinOne() result(result_)
+    function checkJoinOne() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
         use strff, only: join
         use Vegetables_m, only: Result_t, assertEquals
@@ -34,7 +34,7 @@ contains
         result_ = assertEquals(EXAMPLE, join(strings, "anything"))
     end function checkJoinOne
 
-    pure function checkJoinMultiple() result(result_)
+    function checkJoinMultiple() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
         use strff, only: join
         use Vegetables_m, only: Result_t, assertEquals

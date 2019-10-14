@@ -37,7 +37,7 @@ contains
         tests = describe("splitAt", individual_tests)
     end function test_splitAt
 
-    pure function checkSplitDoesntContain() result(result_)
+    function checkSplitDoesntContain() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -53,7 +53,7 @@ contains
                 .and.assertEquals("Hello World", strings(1))
     end function checkSplitDoesntContain
 
-    pure function checkSplitAtSomething() result(result_)
+    function checkSplitAtSomething() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -69,7 +69,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkSplitAtSomething
 
-    pure function checkNoEmptyEnd() result(result_)
+    function checkNoEmptyEnd() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -85,7 +85,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkNoEmptyEnd
 
-    pure function checkNoEmptyBegin() result(result_)
+    function checkNoEmptyBegin() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -101,7 +101,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkNoEmptyBegin
 
-    pure function checkNoSplitCharacters() result(result_)
+    function checkNoSplitCharacters() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -116,7 +116,7 @@ contains
                 .and.assertEquals("Hello,World", strings(1))
     end function checkNoSplitCharacters
 
-    pure function checkNoEmptyBetween() result(result_)
+    function checkNoEmptyBetween() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -132,7 +132,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkNoEmptyBetween
 
-    pure function checkForEmptyString() result(result_)
+    function checkForEmptyString() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals
@@ -145,7 +145,7 @@ contains
         result_ = assertEquals(0, size(strings))
     end function checkForEmptyString
 
-    pure function checkForOnlySplitCharacters() result(result_)
+    function checkForOnlySplitCharacters() result(result_)
         use ISO_VARYING_STRING, only: VARYING_STRING
         use strff, only: splitAt
         use Vegetables_m, only: Result_t, assertEquals

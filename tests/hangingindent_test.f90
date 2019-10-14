@@ -16,16 +16,22 @@ contains
         tests = describe("hangingIndent", individual_tests)
     end function test_hangingIndent
 
-    pure function checkSingleLine() result(result_)
+    function checkSingleLine() result(result_)
+        use iso_varying_string, only: VARYING_STRING
         use strff, only: hangingIndent
         use Vegetables_m, only: Result_t, assertEquals
 
         type(Result_t) :: result_
 
-        result_ = assertEquals("Test", hangingIndent("Test", 1))
+        type(VARYING_STRING) :: indented
+
+        indented = hangingIndent("Test", 1)
+
+        result_ = assertEquals("Test", indented)
     end function checkSingleLine
 
-    pure function checkIndentsCorrectly() result(result_)
+    function checkIndentsCorrectly() result(result_)
+        use iso_varying_string, only: VARYING_STRING
         use strff, only: hangingIndent, NEWLINE
         use Vegetables_m, only: Result_t, assertEquals
 
@@ -39,7 +45,10 @@ contains
                 "First Line" // NEWLINE &
                 // "    Second Line" // NEWLINE &
                 // "    Third Line"
+        type(VARYING_STRING) :: indented
 
-        result_ = assertEquals(expected, hangingIndent(input, 4))
+        indented = hangingIndent(input, 4)
+
+        result_ = assertEquals(expected, indented)
     end function checkIndentsCorrectly
 end module hangingindent_test
