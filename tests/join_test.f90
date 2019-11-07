@@ -1,12 +1,14 @@
 module join_test
+    use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
+    use strff, only: join
+    use Vegetables_m, only: Result_t, TestItem_t, assertEquals, describe, it
+
     implicit none
     private
 
     public :: test_join
 contains
     function test_join() result(tests)
-        use Vegetables_m, only: TestItem_t, describe, it
-
         type(TestItem_t) :: tests
 
         type(TestItem_t) :: individual_tests(2)
@@ -20,10 +22,6 @@ contains
     end function test_join
 
     function checkJoinOne() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-        use strff, only: join
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         character(len=*), parameter :: EXAMPLE = "Example"
@@ -35,10 +33,6 @@ contains
     end function checkJoinOne
 
     function checkJoinMultiple() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-        use strff, only: join
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(3)

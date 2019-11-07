@@ -1,12 +1,14 @@
 module tostring_test
+    use iso_varying_string, only: VARYING_STRING
+    use strff, only: toString
+    use Vegetables_m, only: Result_t, TestItem_t, assertEquals, describe, it
+
     implicit none
     private
 
     public :: test_toString_for_doubles, test_toString_for_integers
 contains
     function test_toString_for_doubles() result(tests)
-        use Vegetables_m, only: TestItem_t, describe, it
-
         type(TestItem_t) :: tests
 
         type(TestItem_t) :: individual_tests(6)
@@ -33,8 +35,6 @@ contains
     end function test_toString_for_doubles
 
     function test_toString_for_integers() result(tests)
-        use Vegetables_m, only: TestItem_t, describe, it
-
         type(TestItem_t) :: tests
 
         type(TestItem_t) :: individual_tests(1)
@@ -44,10 +44,6 @@ contains
     end function test_toString_for_integers
 
     function checkIncludesZeroAfterDecimal() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(2)
@@ -61,10 +57,6 @@ contains
     end function checkIncludesZeroAfterDecimal
 
     function checkOnlyKeepsSixDigits() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(8)
@@ -90,10 +82,6 @@ contains
     end function checkOnlyKeepsSixDigits
 
     function checkHandlesZero() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         double precision, parameter :: MACHINE_TINY = TINY(0.0D0)
@@ -108,10 +96,6 @@ contains
     end function checkHandlesZero
 
     function checkHandlesExtremeNumbers() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(12)
@@ -145,10 +129,6 @@ contains
     end function checkHandlesExtremeNumbers
 
     function checkNegativeNumbers() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(5)
@@ -168,10 +148,6 @@ contains
     end function checkNegativeNumbers
 
     function checkRoundNumbers() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: the_string
@@ -183,10 +159,6 @@ contains
     end function checkRoundNumbers
 
     function checkToStringForIntegers() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: toString
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(3)

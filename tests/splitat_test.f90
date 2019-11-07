@@ -1,12 +1,14 @@
 module splitat_test
+    use ISO_VARYING_STRING, only: VARYING_STRING
+    use strff, only: splitAt
+    use Vegetables_m, only: Result_t, TestItem_t, assertEquals, describe, it
+
     implicit none
     private
 
     public :: test_splitAt
 contains
     function test_splitAt() result(tests)
-        use Vegetables_m, only: TestItem_t, describe, it
-
         type(TestItem_t) :: tests
 
         type(TestItem_t) :: individual_tests(8)
@@ -38,10 +40,6 @@ contains
     end function test_splitAt
 
     function checkSplitDoesntContain() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -54,10 +52,6 @@ contains
     end function checkSplitDoesntContain
 
     function checkSplitAtSomething() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -70,10 +64,6 @@ contains
     end function checkSplitAtSomething
 
     function checkNoEmptyEnd() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -86,10 +76,6 @@ contains
     end function checkNoEmptyEnd
 
     function checkNoEmptyBegin() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -102,10 +88,6 @@ contains
     end function checkNoEmptyBegin
 
     function checkNoSplitCharacters() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -117,10 +99,6 @@ contains
     end function checkNoSplitCharacters
 
     function checkNoEmptyBetween() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -133,10 +111,6 @@ contains
     end function checkNoEmptyBetween
 
     function checkForEmptyString() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -146,10 +120,6 @@ contains
     end function checkForEmptyString
 
     function checkForOnlySplitCharacters() result(result_)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-        use strff, only: splitAt
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)

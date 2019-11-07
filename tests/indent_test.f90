@@ -1,12 +1,14 @@
 module indent_test
+    use iso_varying_string, only: VARYING_STRING
+    use strff, only: indent, NEWLINE
+    use Vegetables_m, only: Result_t, TestItem_t, assertEquals, describe, it
+
     implicit none
     private
 
     public :: test_indent
 contains
     function test_indent() result(tests)
-        use Vegetables_m, only: TestItem_t, describe, it
-
         type(TestItem_t) :: tests
 
         type(TestItem_t) :: individual_tests(2)
@@ -17,10 +19,6 @@ contains
     end function test_indent
 
     function checkSingleLine() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: indent
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: indented
@@ -31,10 +29,6 @@ contains
     end function checkSingleLine
 
     function checkindentsCorrectly() result(result_)
-        use iso_varying_string, only: VARYING_STRING
-        use strff, only: indent, NEWLINE
-        use Vegetables_m, only: Result_t, assertEquals
-
         type(Result_t) :: result_
 
         character(len=*), parameter :: input = &

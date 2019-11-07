@@ -1,4 +1,8 @@
 module strff
+    use ISO_FORTRAN_ENV, only: INT8, INT16, INT32, INT64, REAL32, REAL64
+    use ISO_VARYING_STRING, only: &
+            VARYING_STRING, assignment(=), operator(//), char, len, var_str
+
     implicit none
     private
 
@@ -100,8 +104,6 @@ module strff
             withoutLastCharacter
 contains
     pure function coverEmptyDecimalC(number) result(fixed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         character(len=*), intent(in) :: number
         type(VARYING_STRING) :: fixed
 
@@ -115,8 +117,6 @@ contains
     end function coverEmptyDecimalC
 
     pure function coverEmptyDecimalS(number) result(fixed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: number
         type(VARYING_STRING) :: fixed
 
@@ -131,8 +131,6 @@ contains
     end function firstCharacterC
 
     pure function firstCharacterS(string) result(char_)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: string
         character(len=1) :: char_
 
@@ -140,8 +138,6 @@ contains
     end function firstCharacterS
 
     pure function hangingIndentC(string, spaces) result(indented)
-        use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
-
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
         type(VARYING_STRING) :: indented
@@ -150,8 +146,6 @@ contains
     end function hangingIndentC
 
     pure function hangingIndentS(string, spaces) result(indented)
-        use ISO_VARYING_STRING, only: VARYING_STRING
-
         type(VARYING_STRING), intent(in) :: string
         integer, intent(in) :: spaces
         type(VARYING_STRING) :: indented
@@ -171,8 +165,6 @@ contains
     end function includesCC
 
     pure function includesCS(within, search_for)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         character(len=*), intent(in) :: within
         type(VARYING_STRING), intent(in) :: search_for
         logical :: includesCS
@@ -181,8 +173,6 @@ contains
     end function includesCS
 
     pure function includesSC(within, search_for)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: within
         character(len=*), intent(in) :: search_for
         logical :: includesSC
@@ -191,8 +181,6 @@ contains
     end function includesSC
 
     pure function includesSS(within, search_for)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: within
         type(VARYING_STRING), intent(in) :: search_for
         logical :: includesSS
@@ -201,8 +189,6 @@ contains
     end function includesSS
 
     pure function indentC(string, spaces) result(indented)
-        use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
-
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
         type(VARYING_STRING) :: indented
@@ -211,8 +197,6 @@ contains
     end function indentC
 
     pure function indentS(string, spaces) result(indented)
-        use ISO_VARYING_STRING, only: VARYING_STRING, operator(//)
-
         type(VARYING_STRING), intent(in) :: string
         integer, intent(in) :: spaces
         type(VARYING_STRING) :: indented
@@ -221,8 +205,6 @@ contains
     end function indentS
 
     pure function joinC(strings, separator) result(string)
-        use ISO_VARYING_STRING, only: VARYING_STRING, VAR_STR
-
         type(VARYING_STRING), intent(in) :: strings(:)
         character(len=*), intent(in) :: separator
         type(VARYING_STRING) :: string
@@ -231,9 +213,6 @@ contains
     end function joinC
 
     pure recursive function joinS(strings, separator) result(string)
-        use ISO_VARYING_STRING, only: &
-                VARYING_STRING, assignment(=), operator(//)
-
         type(VARYING_STRING), intent(in) :: strings(:)
         type(VARYING_STRING), intent(in) :: separator
         type(VARYING_STRING) :: string
@@ -264,8 +243,6 @@ contains
     end function lastCharacterC
 
     pure function lastCharacterS(string) result(char_)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: string
         character(len=1) :: char_
 
@@ -273,8 +250,6 @@ contains
     end function lastCharacterS
 
     pure function removeTrailingZerosC(number) result(trimmed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         character(len=*), intent(in) :: number
         type(VARYING_STRING) :: trimmed
 
@@ -286,8 +261,6 @@ contains
     end function removeTrailingZerosC
 
     pure function removeTrailingZerosS(number) result(trimmed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: number
         type(VARYING_STRING) :: trimmed
 
@@ -296,8 +269,6 @@ contains
 
     pure recursive function splitAtCC( &
             string, split_characters) result(strings)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(VARYING_STRING), allocatable :: strings(:)
@@ -353,8 +324,6 @@ contains
     end function splitAtCC
 
     pure function splitAtCS(string, split_characters) result(strings)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         character(len=*), intent(in) :: string
         type(VARYING_STRING), intent(in) :: split_characters
         type(VARYING_STRING), allocatable :: strings(:)
@@ -363,8 +332,6 @@ contains
     end function splitAtCS
 
     pure function splitAtSC(string, split_characters) result(strings)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(VARYING_STRING), allocatable :: strings(:)
@@ -373,8 +340,6 @@ contains
     end function splitAtSC
 
     pure function splitAtSS(string, split_characters) result(strings)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: string
         type(VARYING_STRING), intent(in) :: split_characters
         type(VARYING_STRING), allocatable :: strings(:)
@@ -383,9 +348,6 @@ contains
     end function splitAtSS
 
     pure function toStringInt8(number) result(string)
-        use ISO_FORTRAN_ENV, only: INT8
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         integer(INT8), intent(in) :: number
         type(VARYING_STRING) :: string
 
@@ -396,9 +358,6 @@ contains
     end function toStringInt8
 
     pure function toStringInt16(number) result(string)
-        use ISO_FORTRAN_ENV, only: INT16
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         integer(INT16), intent(in) :: number
         type(VARYING_STRING) :: string
 
@@ -409,9 +368,6 @@ contains
     end function toStringInt16
 
     pure function toStringInt32(number) result(string)
-        use ISO_FORTRAN_ENV, only: INT32
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         integer(INT32), intent(in) :: number
         type(VARYING_STRING) :: string
 
@@ -422,9 +378,6 @@ contains
     end function toStringInt32
 
     pure function toStringInt64(number) result(string)
-        use ISO_FORTRAN_ENV, only: INT64
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         integer(INT64), intent(in) :: number
         type(VARYING_STRING) :: string
 
@@ -435,8 +388,6 @@ contains
     end function toStringInt64
 
     pure function toStringLogical(logical_) result(string)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         logical, intent(in) :: logical_
         type(VARYING_STRING) :: string
 
@@ -448,9 +399,6 @@ contains
     end function toStringLogical
 
     pure function toStringReal32(number) result(string)
-        use ISO_FORTRAN_ENV, only: REAL32
-        use ISO_VARYING_STRING, only: VARYING_STRING
-
         real(REAL32), intent(in) :: number
         type(VARYING_STRING) :: string
 
@@ -458,9 +406,6 @@ contains
     end function toStringReal32
 
     pure function toStringReal64(number) result(string)
-        use ISO_FORTRAN_ENV, only: REAL64
-        use ISO_VARYING_STRING, only: VARYING_STRING
-
         real(REAL64), intent(in) :: number
         type(VARYING_STRING) :: string
 
@@ -468,9 +413,6 @@ contains
     end function toStringReal64
 
     ! pure function toStringReal128(number) result(string)
-    !     use ISO_FORTRAN_ENV, only: REAL128
-    !     use ISO_VARYING_STRING, only: VARYING_STRING
-    !
     !     real(REAL128), intent(in) :: number
     !     type(VARYING_STRING) :: string
     !
@@ -479,10 +421,6 @@ contains
 
     pure function toStringWithSignificantDigitsReal32( &
             number, significant_digits) result(string_)
-        use ISO_FORTRAN_ENV, only: REAL32
-        use ISO_VARYING_STRING, only: &
-                VARYING_STRING, assignment(=), operator(//), len
-
         real(REAL32), intent(in) :: number
         integer, intent(in) :: significant_digits
         type(VARYING_STRING) :: string_
@@ -549,10 +487,6 @@ contains
 
     pure function toStringWithSignificantDigitsReal64( &
             number, significant_digits) result(string_)
-        use ISO_FORTRAN_ENV, only: REAL64
-        use ISO_VARYING_STRING, only: &
-                VARYING_STRING, assignment(=), operator(//), len
-
         real(REAL64), intent(in) :: number
         integer, intent(in) :: significant_digits
         type(VARYING_STRING) :: string_
@@ -619,10 +553,6 @@ contains
 
     ! pure function toStringWithSignificantDigitsReal128( &
     !         number, significant_digits) result(string_)
-    !     use ISO_FORTRAN_ENV, only: REAL128
-    !     use ISO_VARYING_STRING, only: &
-    !             VARYING_STRING, assignment(=), operator(//), len
-    !
     !     real(REAL128), intent(in) :: number
     !     integer, intent(in) :: significant_digits
     !     type(VARYING_STRING) :: string_
@@ -688,8 +618,6 @@ contains
     ! end function toStringWithSignificantDigitsReal128
 
     pure function withoutFirstCharacterC(string) result(trimmed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         character(len=*), intent(in) :: string
         type(VARYING_STRING) :: trimmed
 
@@ -697,8 +625,6 @@ contains
     end function withoutFirstCharacterC
 
     pure function withoutFirstCharacterS(string) result(trimmed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: string
         type(VARYING_STRING) :: trimmed
 
@@ -706,8 +632,6 @@ contains
     end function withoutFirstCharacterS
 
     pure function withoutLastCharacterC(string) result(trimmed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-
         character(len=*), intent(in) :: string
         type(VARYING_STRING) :: trimmed
 
@@ -715,8 +639,6 @@ contains
     end function withoutLastCharacterC
 
     pure function withoutLastCharacterS(string) result(trimmed)
-        use ISO_VARYING_STRING, only: VARYING_STRING, char
-
         type(VARYING_STRING), intent(in) :: string
         type(VARYING_STRING) :: trimmed
 
