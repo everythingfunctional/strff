@@ -18,7 +18,7 @@ contains
         tests = describe("indent", individual_tests)
     end function test_indent
 
-    function checkSingleLine() result(result_)
+    pure function checkSingleLine() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: indented
@@ -28,7 +28,7 @@ contains
         result_ = assertEquals("    Test", indented)
     end function checkSingleLine
 
-    function checkindentsCorrectly() result(result_)
+    pure function checkindentsCorrectly() result(result_)
         type(Result_t) :: result_
 
         character(len=*), parameter :: input = &

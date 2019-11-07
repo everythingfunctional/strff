@@ -43,7 +43,7 @@ contains
         tests = describe("toString for integers", individual_tests)
     end function test_toString_for_integers
 
-    function checkIncludesZeroAfterDecimal() result(result_)
+    pure function checkIncludesZeroAfterDecimal() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(2)
@@ -56,7 +56,7 @@ contains
                 .and.assertEquals("10.0", strings(2))
     end function checkIncludesZeroAfterDecimal
 
-    function checkOnlyKeepsSixDigits() result(result_)
+    pure function checkOnlyKeepsSixDigits() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(8)
@@ -81,7 +81,7 @@ contains
             .and.assertEquals("1.23456e-2", strings(8))
     end function checkOnlyKeepsSixDigits
 
-    function checkHandlesZero() result(result_)
+    pure function checkHandlesZero() result(result_)
         type(Result_t) :: result_
 
         double precision, parameter :: MACHINE_TINY = TINY(0.0D0)
@@ -95,7 +95,7 @@ contains
                 .and.assertEquals("0.0", strings(2))
     end function checkHandlesZero
 
-    function checkHandlesExtremeNumbers() result(result_)
+    pure function checkHandlesExtremeNumbers() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(12)
@@ -128,7 +128,7 @@ contains
                 .and.assertEquals("1.23456e-111", strings(12))
     end function checkHandlesExtremeNumbers
 
-    function checkNegativeNumbers() result(result_)
+    pure function checkNegativeNumbers() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(5)
@@ -147,7 +147,7 @@ contains
                 .and.assertEquals("-1.23457e111", strings(5))
     end function checkNegativeNumbers
 
-    function checkRoundNumbers() result(result_)
+    pure function checkRoundNumbers() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: the_string
@@ -158,7 +158,7 @@ contains
                 assertEquals("1.0e6", the_string)
     end function checkRoundNumbers
 
-    function checkToStringForIntegers() result(result_)
+    pure function checkToStringForIntegers() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(3)

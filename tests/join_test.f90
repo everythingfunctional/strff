@@ -21,7 +21,7 @@ contains
         tests = describe("join", individual_tests)
     end function test_join
 
-    function checkJoinOne() result(result_)
+    pure function checkJoinOne() result(result_)
         type(Result_t) :: result_
 
         character(len=*), parameter :: EXAMPLE = "Example"
@@ -32,7 +32,7 @@ contains
         result_ = assertEquals(EXAMPLE, join(strings, "anything"))
     end function checkJoinOne
 
-    function checkJoinMultiple() result(result_)
+    pure function checkJoinMultiple() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING) :: strings(3)

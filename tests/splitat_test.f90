@@ -39,7 +39,7 @@ contains
         tests = describe("splitAt", individual_tests)
     end function test_splitAt
 
-    function checkSplitDoesntContain() result(result_)
+    pure function checkSplitDoesntContain() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -51,7 +51,7 @@ contains
                 .and.assertEquals("Hello World", strings(1))
     end function checkSplitDoesntContain
 
-    function checkSplitAtSomething() result(result_)
+    pure function checkSplitAtSomething() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -63,7 +63,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkSplitAtSomething
 
-    function checkNoEmptyEnd() result(result_)
+    pure function checkNoEmptyEnd() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -75,7 +75,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkNoEmptyEnd
 
-    function checkNoEmptyBegin() result(result_)
+    pure function checkNoEmptyBegin() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -87,7 +87,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkNoEmptyBegin
 
-    function checkNoSplitCharacters() result(result_)
+    pure function checkNoSplitCharacters() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -98,7 +98,7 @@ contains
                 .and.assertEquals("Hello,World", strings(1))
     end function checkNoSplitCharacters
 
-    function checkNoEmptyBetween() result(result_)
+    pure function checkNoEmptyBetween() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -110,7 +110,7 @@ contains
                 .and.assertEquals("World", strings(2))
     end function checkNoEmptyBetween
 
-    function checkForEmptyString() result(result_)
+    pure function checkForEmptyString() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
@@ -119,7 +119,7 @@ contains
         result_ = assertEquals(0, size(strings))
     end function checkForEmptyString
 
-    function checkForOnlySplitCharacters() result(result_)
+    pure function checkForOnlySplitCharacters() result(result_)
         type(Result_t) :: result_
 
         type(VARYING_STRING), allocatable :: strings(:)
