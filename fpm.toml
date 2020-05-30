@@ -1,0 +1,11 @@
+name = "strff"
+
+[dependencies]
+iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string.git", branch = "MigrateToFpm" }
+
+[[test]]
+  name = "test"
+  source-dir = "tests"
+  main = "main.f90"
+  [test.dependencies]
+    vegetables = { git = "https://gitlab.com/everythingfunctional/vegetables.git", branch = "MigrateToFpm" }
