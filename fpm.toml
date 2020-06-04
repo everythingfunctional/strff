@@ -1,0 +1,12 @@
+name = "strff"
+version = "1.0.0"
+license = "MIT"
+author = "Brad Richardson"
+maintainer = "everythingfunctional@protonmail.com"
+copyright = "2020 Brad Richardson"
+
+[dependencies]
+iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string.git", tag = "v1.0.0" }
+
+[dev-dependencies]
+vegetables = { git = "https://gitlab.com/everythingfunctional/vegetables.git", tag = "v5.0.0" }
