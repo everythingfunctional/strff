@@ -14,6 +14,13 @@ module strff
         module procedure includesSS
     end interface operator(.includes.)
 
+    interface operator(.startsWith.)
+        module procedure startsWithCC
+        module procedure startsWithCS
+        module procedure startsWithSC
+        module procedure startsWithSS
+    end interface operator(.startsWith.)
+
     interface coverEmptyDecimal
         module procedure coverEmptyDecimalC
         module procedure coverEmptyDecimalS
@@ -96,6 +103,7 @@ module strff
 
     public :: &
             operator(.includes.), &
+            operator(.startsWith.), &
             coverEmptyDecimal, &
             firstCharacter, &
             hangingIndent, &
@@ -386,6 +394,38 @@ contains
 
         allocate(strings, source = splitAt(char(string), char(split_characters)))
     end function splitAtSS
+
+    pure function startsWithCC(string, substring)
+        character(len=*), intent(in) :: string
+        character(len=*), intent(in) :: substring
+        logical :: startsWithCC
+
+        startsWithCC = index(string, substring) == 1
+    end function startsWithCC
+
+    pure function startsWithCS(string, substring)
+        character(len=*), intent(in) :: string
+        type(VARYING_STRING), intent(in) :: substring
+        logical :: startsWithCS
+
+        startsWithCS = string.startsWith.char(substring)
+    end function startsWithCS
+
+    pure function startsWithSC(string, substring)
+        type(VARYING_STRING), intent(in) :: string
+        character(len=*), intent(in) :: substring
+        logical :: startsWithSC
+
+        startsWithSC = char(string).startsWith.substring
+    end function startsWithSC
+
+    pure function startsWithSS(string, substring)
+        type(VARYING_STRING), intent(in) :: string
+        type(VARYING_STRING), intent(in) :: substring
+        logical :: startsWithSS
+
+        startsWithSS = char(string).startsWith.char(substring)
+    end function startsWithSS
 
     pure function toStringInt8(number) result(string)
         integer(INT8), intent(in) :: number
