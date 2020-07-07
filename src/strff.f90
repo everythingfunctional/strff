@@ -1,7 +1,8 @@
 module strff
-    use ISO_FORTRAN_ENV, only: INT8, INT16, INT32, INT64, REAL32, REAL64
+    use ISO_FORTRAN_ENV, only: &
+            INT8, INT16, INT32, INT64, REAL32, REAL64, iostat_end
     use ISO_VARYING_STRING, only: &
-            VARYING_STRING, assignment(=), operator(//), char, len, var_str
+            VARYING_STRING, assignment(=), operator(//), char, get, len, var_str
 
     implicit none
     private
@@ -50,6 +51,11 @@ module strff
         module procedure lastCharacterS
     end interface lastCharacter
 
+    interface readFileLines
+        module procedure readFileLinesC
+        module procedure readFileLinesS
+    end interface readFileLines
+
     interface removeTrailingZeros
         module procedure removeTrailingZerosC
         module procedure removeTrailingZerosS
@@ -97,6 +103,7 @@ module strff
             indent, &
             join, &
             lastCharacter, &
+            readFileLines, &
             removeTrailingZeros, &
             splitAt, &
             toString, &
@@ -266,6 +273,39 @@ contains
 
         trimmed = removeTrailingZeros(char(number))
     end function removeTrailingZerosS
+
+    function readFileLinesC(filename) result(lines)
+        character(len=*), intent(in) :: filename
+        type(VARYING_STRING), allocatable :: lines(:)
+
+        integer :: file_unit
+        integer :: i
+        integer :: num_lines
+        integer :: stat
+        type(VARYING_STRING) :: tmp
+
+        open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
+        num_lines = 0
+        do
+            call get(file_unit, tmp, iostat = stat)
+            if (stat == iostat_end) exit
+            num_lines = num_lines + 1
+        end do
+        rewind(file_unit)
+
+        allocate(lines(num_lines))
+        do i = 1, num_lines
+            call get(file_unit, lines(i))
+        end do
+        close(file_unit)
+    end function readFileLinesC
+
+    function readFileLinesS(filename) result(lines)
+        type(VARYING_STRING), intent(in) :: filename
+        type(VARYING_STRING), allocatable :: lines(:)
+
+        lines = readFileLines(char(filename))
+    end function readFileLinesS
 
     pure recursive function splitAtCC( &
             string, split_characters) result(strings)
