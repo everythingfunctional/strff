@@ -1,7 +1,8 @@
 module strff
-    use ISO_FORTRAN_ENV, only: INT8, INT16, INT32, INT64, REAL32, REAL64
+    use ISO_FORTRAN_ENV, only: &
+            INT8, INT16, INT32, INT64, REAL32, REAL64, iostat_end
     use ISO_VARYING_STRING, only: &
-            VARYING_STRING, assignment(=), operator(//), char, len, var_str
+            VARYING_STRING, assignment(=), operator(//), char, get, len, var_str
 
     implicit none
     private
@@ -12,6 +13,13 @@ module strff
         module procedure includesSC
         module procedure includesSS
     end interface operator(.includes.)
+
+    interface operator(.startsWith.)
+        module procedure startsWithCC
+        module procedure startsWithCS
+        module procedure startsWithSC
+        module procedure startsWithSS
+    end interface operator(.startsWith.)
 
     interface coverEmptyDecimal
         module procedure coverEmptyDecimalC
@@ -49,6 +57,11 @@ module strff
         module procedure lastCharacterC
         module procedure lastCharacterS
     end interface lastCharacter
+
+    interface readFileLines
+        module procedure readFileLinesC
+        module procedure readFileLinesS
+    end interface readFileLines
 
     interface removeTrailingZeros
         module procedure removeTrailingZerosC
@@ -90,6 +103,7 @@ module strff
 
     public :: &
             operator(.includes.), &
+            operator(.startsWith.), &
             coverEmptyDecimal, &
             firstCharacter, &
             hangingIndent, &
@@ -97,6 +111,7 @@ module strff
             indent, &
             join, &
             lastCharacter, &
+            readFileLines, &
             removeTrailingZeros, &
             splitAt, &
             toString, &
@@ -267,6 +282,39 @@ contains
         trimmed = removeTrailingZeros(char(number))
     end function removeTrailingZerosS
 
+    function readFileLinesC(filename) result(lines)
+        character(len=*), intent(in) :: filename
+        type(VARYING_STRING), allocatable :: lines(:)
+
+        integer :: file_unit
+        integer :: i
+        integer :: num_lines
+        integer :: stat
+        type(VARYING_STRING) :: tmp
+
+        open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
+        num_lines = 0
+        do
+            call get(file_unit, tmp, iostat = stat)
+            if (stat == iostat_end) exit
+            num_lines = num_lines + 1
+        end do
+        rewind(file_unit)
+
+        allocate(lines(num_lines))
+        do i = 1, num_lines
+            call get(file_unit, lines(i))
+        end do
+        close(file_unit)
+    end function readFileLinesC
+
+    function readFileLinesS(filename) result(lines)
+        type(VARYING_STRING), intent(in) :: filename
+        type(VARYING_STRING), allocatable :: lines(:)
+
+        lines = readFileLines(char(filename))
+    end function readFileLinesS
+
     pure recursive function splitAtCC( &
             string, split_characters) result(strings)
         character(len=*), intent(in) :: string
@@ -346,6 +394,38 @@ contains
 
         allocate(strings, source = splitAt(char(string), char(split_characters)))
     end function splitAtSS
+
+    pure function startsWithCC(string, substring)
+        character(len=*), intent(in) :: string
+        character(len=*), intent(in) :: substring
+        logical :: startsWithCC
+
+        startsWithCC = index(string, substring) == 1
+    end function startsWithCC
+
+    pure function startsWithCS(string, substring)
+        character(len=*), intent(in) :: string
+        type(VARYING_STRING), intent(in) :: substring
+        logical :: startsWithCS
+
+        startsWithCS = string.startsWith.char(substring)
+    end function startsWithCS
+
+    pure function startsWithSC(string, substring)
+        type(VARYING_STRING), intent(in) :: string
+        character(len=*), intent(in) :: substring
+        logical :: startsWithSC
+
+        startsWithSC = char(string).startsWith.substring
+    end function startsWithSC
+
+    pure function startsWithSS(string, substring)
+        type(VARYING_STRING), intent(in) :: string
+        type(VARYING_STRING), intent(in) :: substring
+        logical :: startsWithSS
+
+        startsWithSS = char(string).startsWith.char(substring)
+    end function startsWithSS
 
     pure function toStringInt8(number) result(string)
         integer(INT8), intent(in) :: number
