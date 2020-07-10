@@ -58,6 +58,11 @@ module strff
         module procedure lastCharacterS
     end interface lastCharacter
 
+    interface readFile
+        module procedure readFileC
+        module procedure readFileS
+    end interface readFile
+
     interface readFileLines
         module procedure readFileLinesC
         module procedure readFileLinesS
@@ -111,6 +116,7 @@ module strff
             indent, &
             join, &
             lastCharacter, &
+            readFile, &
             readFileLines, &
             removeTrailingZeros, &
             splitAt, &
@@ -281,6 +287,24 @@ contains
 
         trimmed = removeTrailingZeros(char(number))
     end function removeTrailingZerosS
+
+    function readFileC(filename) result(contents)
+        character(len=*), intent(in) :: filename
+        type(VARYING_STRING) :: contents
+
+        type(VARYING_STRING), allocatable :: lines(:)
+
+        allocate(lines(0))
+        lines = readFileLines(filename)
+        contents = join(lines, NEWLINE)
+    end function readFileC
+
+    function readFileS(filename) result(contents)
+        type(VARYING_STRING), intent(in) :: filename
+        type(VARYING_STRING) :: contents
+
+        contents = readFile(char(filename))
+    end function readFileS
 
     function readFileLinesC(filename) result(lines)
         character(len=*), intent(in) :: filename
