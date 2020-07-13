@@ -2,7 +2,14 @@ module strff
     use ISO_FORTRAN_ENV, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, iostat_end
     use ISO_VARYING_STRING, only: &
-            VARYING_STRING, assignment(=), operator(//), char, get, len, var_str
+            VARYING_STRING, &
+            assignment(=), &
+            operator(//), &
+            char, &
+            extract, &
+            get, &
+            len, &
+            var_str
 
     implicit none
     private
@@ -292,11 +299,19 @@ contains
         character(len=*), intent(in) :: filename
         type(VARYING_STRING) :: contents
 
-        type(VARYING_STRING), allocatable :: lines(:)
+        integer :: file_unit
+        integer :: stat
+        type(VARYING_STRING) :: tmp
 
-        allocate(lines(0))
-        lines = readFileLines(filename)
-        contents = join(lines, NEWLINE)
+        open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
+        call get(file_unit, contents, iostat = stat)
+        if (stat == iostat_end) return
+        do
+            call get(file_unit, tmp, iostat = stat)
+            if (stat == iostat_end) exit
+            contents = contents // NEWLINE // tmp
+        end do
+        close(file_unit)
     end function readFileC
 
     function readFileS(filename) result(contents)
