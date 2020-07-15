@@ -1,7 +1,8 @@
 module readfile_test
     use iso_fortran_env, only: iostat_end
-    use iso_varying_string, only: VARYING_STRING, get, put
+    use iso_varying_string, only: VARYING_STRING, operator(//), get, put
     use strff, only: join, readFile, NEWLINE
+    use text_m, only: TEST_TEXT
     use Vegetables_m, only: &
             Result_t, TestItem_t, assertEquals, assertFasterThan, describe, it
 
@@ -16,7 +17,8 @@ contains
         type(TestItem_t) :: individual_tests(2)
 
         individual_tests(1) = it("gets the contents from the file", checkReadFile)
-        individual_tests(2) = it("is faster than a naive implementation", checkSpeed)
+        individual_tests(2) = it( &
+                "is faster than an alternative implementation", checkSpeed)
         tests = describe("readFile", individual_tests)
     end function test_readfile
 
@@ -27,7 +29,7 @@ contains
                 "Just" // NEWLINE &
                 // "Some" // NEWLINE &
                 // "Contents"
-        character(len=*), parameter :: TEMP_FILE_NAME = "temp_file.txt"
+        character(len=*), parameter :: TEMP_FILE_NAME = "readfile_tmp.txt"
         type(VARYING_STRING) :: contents
         integer :: file_unit
 
@@ -46,23 +48,15 @@ contains
     function checkSpeed() result(result_)
         type(Result_t) :: result_
 
-        character(len=*), parameter :: FILE_CONTENTS = &
-                "Just" // NEWLINE &
-                // "Some" // NEWLINE &
-                // "Contents" // NEWLINE &
-                // "For" // NEWLINE &
-                // "Testing" // NEWLINE &
-                // "Read" // NEWLINE &
-                // "Speed"
-        character(len=*), parameter :: TEMP_FILE_NAME = "speed_check_file.txt"
+        character(len=*), parameter :: TEMP_FILE_NAME = "readfile_speed_tmp.txt"
         type(VARYING_STRING) :: contents
         integer :: file_unit
 
         open(newunit = file_unit, file = TEMP_FILE_NAME, action = "WRITE", status = "REPLACE")
-        call put(file_unit, FILE_CONTENTS)
+        call put(file_unit, TEST_TEXT)
         close(file_unit)
 
-        result_ = assertFasterThan(doNaiveRead, doFastRead, 50)
+        result_ = assertFasterThan(doAltRead, doFastRead, 50)
 
         open(newunit = file_unit, file = TEMP_FILE_NAME)
         close(file_unit, status = "DELETE")
@@ -71,37 +65,27 @@ contains
             contents = readFile(TEMP_FILE_NAME)
         end subroutine doFastRead
 
-        subroutine doNaiveRead
-            contents = naiveReadFile(TEMP_FILE_NAME)
-        end subroutine doNaiveRead
+        subroutine doAltRead
+            contents = altReadFile(TEMP_FILE_NAME)
+        end subroutine doAltRead
     end function checkSpeed
 
-    function naiveReadFile(filename) result(contents)
+    function altReadFile(filename) result(contents)
         character(len=*), intent(in) :: filename
         type(VARYING_STRING) :: contents
 
         integer :: file_unit
-        integer :: i
-        type(VARYING_STRING), allocatable :: lines(:)
-        integer :: num_lines
         integer :: stat
         type(VARYING_STRING) :: tmp
 
         open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
-        num_lines = 0
+        call get(file_unit, contents, iostat = stat)
+        if (stat == iostat_end) return
         do
             call get(file_unit, tmp, iostat = stat)
             if (stat == iostat_end) exit
-            num_lines = num_lines + 1
-        end do
-        rewind(file_unit)
-
-        allocate(lines(num_lines))
-        do i = 1, num_lines
-            call get(file_unit, lines(i))
+            contents = contents // NEWLINE // tmp
         end do
         close(file_unit)
-
-        contents = join(lines, NEWLINE)
-    end function naiveReadFile
+    end function altReadFile
 end module readfile_test

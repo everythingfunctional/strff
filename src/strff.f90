@@ -300,18 +300,28 @@ contains
         type(VARYING_STRING) :: contents
 
         integer :: file_unit
+        integer :: i
+        type(VARYING_STRING), allocatable :: lines(:)
+        integer :: num_lines
         integer :: stat
         type(VARYING_STRING) :: tmp
 
         open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
-        call get(file_unit, contents, iostat = stat)
-        if (stat == iostat_end) return
+        num_lines = 0
         do
             call get(file_unit, tmp, iostat = stat)
             if (stat == iostat_end) exit
-            contents = contents // NEWLINE // tmp
+            num_lines = num_lines + 1
+        end do
+        rewind(file_unit)
+
+        allocate(lines(num_lines))
+        do i = 1, num_lines
+            call get(file_unit, lines(i))
         end do
         close(file_unit)
+
+        contents = join(lines, NEWLINE)
     end function readFileC
 
     function readFileS(filename) result(contents)
