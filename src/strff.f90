@@ -277,7 +277,7 @@ contains
         char_ = lastCharacter(char(string))
     end function lastCharacterS
 
-    pure function removeTrailingZerosC(number) result(trimmed)
+    pure recursive function removeTrailingZerosC(number) result(trimmed)
         character(len=*), intent(in) :: number
         type(VARYING_STRING) :: trimmed
 
