@@ -392,7 +392,7 @@ contains
             strings(1) = string
         end if
     contains
-        pure function doSplit(string_, split_characters_) result(strings_)
+        pure recursive function doSplit(string_, split_characters_) result(strings_)
             character(len=*), intent(in) :: string_
             character(len=*), intent(in) :: split_characters_
             type(VARYING_STRING), allocatable :: strings_(:)
