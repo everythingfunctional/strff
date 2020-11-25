@@ -288,7 +288,7 @@ contains
         end if
     end function removeTrailingZerosC
 
-    pure function removeTrailingZerosS(number) result(trimmed)
+    pure recursive function removeTrailingZerosS(number) result(trimmed)
         type(VARYING_STRING), intent(in) :: number
         type(VARYING_STRING) :: trimmed
 
