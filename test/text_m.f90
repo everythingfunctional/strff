@@ -3,8 +3,9 @@ module text_m
 
     implicit none
     private
+    public :: TEST_TEXT
 
-    character(len=*), parameter, public :: TEST_TEXT = &
+    character(len=*), parameter :: TEST_TEXT = &
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor" // NEWLINE &
             // "incididunt ut labore et dolore magna aliqua. Dis parturient montes nascetur" // NEWLINE &
             // "ridiculus mus mauris vitae ultricies leo. Odio pellentesque diam volutpat" // NEWLINE &
@@ -260,4 +261,4 @@ module text_m
             // "Eros in cursus turpis massa tincidunt dui ut. Amet porttitor eget dolor morbi" // NEWLINE &
             // "non arcu risus. Sagittis eu volutpat odio facilisis mauris sit amet massa vitae." // NEWLINE &
             // "Eu mi bibendum neque egestas." // NEWLINE
-end module text_m
+end module

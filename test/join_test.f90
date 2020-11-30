@@ -1,46 +1,45 @@
 module join_test
-    use ISO_VARYING_STRING, only: VARYING_STRING, assignment(=)
-    use strff, only: join
-    use Vegetables_m, only: Result_t, TestItem_t, assertEquals, describe, it
-
     implicit none
     private
 
     public :: test_join
 contains
     function test_join() result(tests)
-        type(TestItem_t) :: tests
+        use vegetables, only: test_item_t, describe, it
 
-        type(TestItem_t) :: individual_tests(2)
+        type(test_item_t) :: tests
+
+        type(test_item_t) :: individual_tests(2)
 
         individual_tests(1) = it( &
-                "for only one string returns that string", checkJoinOne)
+                "for only one string returns that string", check_join_one)
         individual_tests(2) = it( &
                 "puts multiple strings together separated by the given string", &
-                checkJoinMultiple)
+                check_join_multiple)
         tests = describe("join", individual_tests)
     end function test_join
 
-    pure function checkJoinOne() result(result_)
-        type(Result_t) :: result_
+    pure function check_join_one() result(result_)
+        use iso_varying_string, only: var_str
+        use strff, only: join
+        use vegetables, only: result_t, assert_equals
+
+        type(result_t) :: result_
 
         character(len=*), parameter :: EXAMPLE = "Example"
-        type(VARYING_STRING) :: strings(1)
 
-        strings(1) = EXAMPLE
+        result_ = assert_equals(EXAMPLE, join([var_str(EXAMPLE)], "anything"))
+    end function
 
-        result_ = assertEquals(EXAMPLE, join(strings, "anything"))
-    end function checkJoinOne
+    pure function check_join_multiple() result(result_)
+        use iso_varying_string, only: var_str
+        use strff, only: join
+        use vegetables, only: result_t, assert_equals
 
-    pure function checkJoinMultiple() result(result_)
-        type(Result_t) :: result_
+        type(result_t) :: result_
 
-        type(VARYING_STRING) :: strings(3)
-
-        strings(1) = "Hello"
-        strings(2) = "again"
-        strings(3) = "world"
-
-        result_ = assertEquals("Hello, again, world", join(strings, ", "))
-    end function checkJoinMultiple
-end module join_test
+        result_ = assert_equals( &
+                "Hello, again, world", &
+                join([var_str("Hello"), var_str("again"), var_str("world")], ", "))
+    end function
+end module

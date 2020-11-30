@@ -1,249 +1,256 @@
 module strff
-    use ISO_FORTRAN_ENV, only: &
-            INT8, INT16, INT32, INT64, REAL32, REAL64, iostat_end
-    use ISO_VARYING_STRING, only: &
-            VARYING_STRING, &
-            assignment(=), &
-            operator(//), &
-            char, &
-            extract, &
-            get, &
-            len, &
-            var_str
-
     implicit none
     private
-
-    interface operator(.includes.)
-        module procedure includesCC
-        module procedure includesCS
-        module procedure includesSC
-        module procedure includesSS
-    end interface operator(.includes.)
-
-    interface operator(.startsWith.)
-        module procedure startsWithCC
-        module procedure startsWithCS
-        module procedure startsWithSC
-        module procedure startsWithSS
-    end interface operator(.startsWith.)
-
-    interface coverEmptyDecimal
-        module procedure coverEmptyDecimalC
-        module procedure coverEmptyDecimalS
-    end interface coverEmptyDecimal
-
-    interface firstCharacter
-        module procedure firstCharacterC
-        module procedure firstCharacterS
-    end interface firstCharacter
-
-    interface hangingIndent
-        module procedure hangingIndentC
-        module procedure hangingIndentS
-    end interface hangingIndent
-
-    interface includes
-        module procedure includesCC
-        module procedure includesCS
-        module procedure includesSC
-        module procedure includesSS
-    end interface includes
-
-    interface indent
-        module procedure indentC
-        module procedure indentS
-    end interface indent
-
-    interface join
-        module procedure joinC
-        module procedure joinS
-    end interface join
-
-    interface lastCharacter
-        module procedure lastCharacterC
-        module procedure lastCharacterS
-    end interface lastCharacter
-
-    interface readFile
-        module procedure readFileC
-        module procedure readFileS
-    end interface readFile
-
-    interface readFileLines
-        module procedure readFileLinesC
-        module procedure readFileLinesS
-    end interface readFileLines
-
-    interface removeTrailingZeros
-        module procedure removeTrailingZerosC
-        module procedure removeTrailingZerosS
-    end interface removeTrailingZeros
-
-    interface splitAt
-        module procedure splitAtCC
-        module procedure splitAtCS
-        module procedure splitAtSC
-        module procedure splitAtSS
-    end interface splitAt
-
-    interface toString
-        module procedure toStringInt8
-        module procedure toStringInt16
-        module procedure toStringInt32
-        module procedure toStringInt64
-        module procedure toStringLogical
-        module procedure toStringReal32
-        module procedure toStringReal64
-        ! module procedure toStringReal128
-        module procedure toStringWithSignificantDigitsReal32
-        module procedure toStringWithSignificantDigitsReal64
-        ! module procedure toStringWithSignificantDigitsReal128
-    end interface toString
-
-    interface withoutFirstCharacter
-        module procedure withoutFirstCharacterC
-        module procedure withoutFirstCharacterS
-    end interface withoutFirstCharacter
-
-    interface withoutLastCharacter
-        module procedure withoutLastCharacterC
-        module procedure withoutLastCharacterS
-    end interface withoutLastCharacter
-
-    character(len=*), parameter, public :: NEWLINE = NEW_LINE('A')
-
     public :: &
             operator(.includes.), &
-            operator(.startsWith.), &
-            coverEmptyDecimal, &
-            firstCharacter, &
-            hangingIndent, &
+            operator(.startswith.), &
+            cover_empty_decimal, &
+            first_character, &
+            hanging_indent, &
             includes, &
             indent, &
             join, &
-            lastCharacter, &
-            readFile, &
-            readFileLines, &
-            removeTrailingZeros, &
-            splitAt, &
-            toString, &
-            withoutFirstCharacter, &
-            withoutLastCharacter
-contains
-    pure function coverEmptyDecimalC(number) result(fixed)
-        character(len=*), intent(in) :: number
-        type(VARYING_STRING) :: fixed
+            last_character, &
+            read_file, &
+            read_file_lines, &
+            remove_trailing_zeros, &
+            split_at, &
+            to_string, &
+            without_first_character, &
+            without_last_character, &
+            NEWLINE
 
-        if (lastCharacter(number) == ".") then
+    interface operator(.includes.)
+        module procedure includes_cc
+        module procedure includes_cs
+        module procedure includes_sc
+        module procedure includes_ss
+    end interface
+
+    interface operator(.startswith.)
+        module procedure starts_with_cc
+        module procedure starts_with_cs
+        module procedure starts_with_sc
+        module procedure starts_with_ss
+    end interface
+
+    interface cover_empty_decimal
+        module procedure cover_empty_decimal_c
+        module procedure cover_empty_decimal_s
+    end interface
+
+    interface first_character
+        module procedure first_character_c
+        module procedure first_character_s
+    end interface
+
+    interface hanging_indent
+        module procedure hanging_indent_c
+        module procedure hanging_indent_s
+    end interface
+
+    interface includes
+        module procedure includes_cc
+        module procedure includes_cs
+        module procedure includes_sc
+        module procedure includes_ss
+    end interface
+
+    interface indent
+        module procedure indent_c
+        module procedure indent_s
+    end interface
+
+    interface join
+        module procedure join_c
+        module procedure join_s
+    end interface
+
+    interface last_character
+        module procedure last_character_c
+        module procedure last_character_s
+    end interface
+
+    interface read_file
+        module procedure read_file_c
+        module procedure read_file_s
+    end interface
+
+    interface read_file_lines
+        module procedure read_file_lines_c
+        module procedure read_file_lines_s
+    end interface
+
+    interface remove_trailing_zeros
+        module procedure remove_trailing_zeros_c
+        module procedure remove_trailing_zeros_s
+    end interface
+
+    interface split_at
+        module procedure split_at_cc
+        module procedure split_at_cs
+        module procedure split_at_sc
+        module procedure split_at_ss
+    end interface
+
+    interface to_string
+        module procedure to_string_int8
+        module procedure to_string_int16
+        module procedure to_string_int32
+        module procedure to_string_int64
+        module procedure to_string_logical
+        module procedure to_string_real32
+        module procedure to_string_real64
+        module procedure to_string_with_significant_digits_real32
+        module procedure to_string_with_significant_digits_real64
+    end interface
+
+    interface without_first_character
+        module procedure without_first_character_c
+        module procedure without_first_character_s
+    end interface
+
+    interface without_last_character
+        module procedure without_last_character_c
+        module procedure without_last_character_s
+    end interface
+
+    character(len=*), parameter :: NEWLINE = NEW_LINE('A')
+contains
+    pure function cover_empty_decimal_c(number) result(fixed)
+        use iso_varying_string, only: varying_string, assignment(=)
+
+        character(len=*), intent(in) :: number
+        type(varying_string) :: fixed
+
+        if (last_character(number) == ".") then
             fixed = number // "0"
-        else if (firstCharacter(number) == ".") then
+        else if (first_character(number) == ".") then
             fixed = "0" // number
         else
             fixed = number
         end if
-    end function coverEmptyDecimalC
+    end function
 
-    pure function coverEmptyDecimalS(number) result(fixed)
-        type(VARYING_STRING), intent(in) :: number
-        type(VARYING_STRING) :: fixed
+    pure function cover_empty_decimal_s(number) result(fixed)
+        use iso_varying_string, only: varying_string, char
 
-        fixed = coverEmptyDecimal(char(number))
-    end function coverEmptyDecimalS
+        type(varying_string), intent(in) :: number
+        type(varying_string) :: fixed
 
-    pure function firstCharacterC(string) result(char_)
+        fixed = cover_empty_decimal(char(number))
+    end function
+
+    pure function first_character_c(string) result(char_)
         character(len=*), intent(in) :: string
         character(len=1) :: char_
 
         char_ = string(1:1)
-    end function firstCharacterC
+    end function
 
-    pure function firstCharacterS(string) result(char_)
-        type(VARYING_STRING), intent(in) :: string
+    pure function first_character_s(string) result(char_)
+        use iso_varying_string, only: varying_string, char
+
+        type(varying_string), intent(in) :: string
         character(len=1) :: char_
 
-        char_ = firstCharacter(char(string))
-    end function firstCharacterS
+        char_ = first_character(char(string))
+    end function
 
-    pure function hangingIndentC(string, spaces) result(indented)
+    pure function hanging_indent_c(string, spaces) result(indented)
+        use iso_varying_string, only: varying_string, var_str
+
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
-        type(VARYING_STRING) :: indented
+        type(varying_string) :: indented
 
-        indented = hangingIndent(VAR_STR(string), spaces)
-    end function hangingIndentC
+        indented = hanging_indent(var_str(string), spaces)
+    end function
 
-    pure function hangingIndentS(string, spaces) result(indented)
-        type(VARYING_STRING), intent(in) :: string
+    pure function hanging_indent_s(string, spaces) result(indented)
+        use iso_varying_string, only: varying_string
+
+        type(varying_string), intent(in) :: string
         integer, intent(in) :: spaces
-        type(VARYING_STRING) :: indented
+        type(varying_string) :: indented
 
-        type(VARYING_STRING), allocatable :: lines(:)
+        indented = join(split_at(string, NEWLINE), NEWLINE // repeat(" ", spaces))
+    end function
 
-        allocate(lines, source = splitAt(string, NEWLINE))
-        indented = join(lines, NEWLINE // repeat(" ", spaces))
-    end function hangingIndentS
-
-    pure function includesCC(within, search_for)
+    pure function includes_cc(within, search_for)
         character(len=*), intent(in) :: within
         character(len=*), intent(in) :: search_for
-        logical :: includesCC
+        logical :: includes_cc
 
-        includesCC = index(within, search_for) > 0
-    end function includesCC
+        includes_cc = index(within, search_for) > 0
+    end function
 
-    pure function includesCS(within, search_for)
+    pure function includes_cs(within, search_for)
+        use iso_varying_string, only: varying_string, char
+
         character(len=*), intent(in) :: within
-        type(VARYING_STRING), intent(in) :: search_for
-        logical :: includesCS
+        type(varying_string), intent(in) :: search_for
+        logical :: includes_cs
 
-        includesCS = within.includes.char(search_for)
-    end function includesCS
+        includes_cs = within.includes.char(search_for)
+    end function
 
-    pure function includesSC(within, search_for)
-        type(VARYING_STRING), intent(in) :: within
+    pure function includes_sc(within, search_for)
+        use iso_varying_string, only: varying_string, char
+
+        type(varying_string), intent(in) :: within
         character(len=*), intent(in) :: search_for
-        logical :: includesSC
+        logical :: includes_sc
 
-        includesSC = char(within).includes.search_for
-    end function includesSC
+        includes_sc = char(within).includes.search_for
+    end function
 
-    pure function includesSS(within, search_for)
-        type(VARYING_STRING), intent(in) :: within
-        type(VARYING_STRING), intent(in) :: search_for
-        logical :: includesSS
+    pure function includes_ss(within, search_for)
+        use iso_varying_string, only: varying_string, char
 
-        includesSS = char(within).includes.char(search_for)
-    end function includesSS
+        type(varying_string), intent(in) :: within
+        type(varying_string), intent(in) :: search_for
+        logical :: includes_ss
 
-    pure function indentC(string, spaces) result(indented)
+        includes_ss = char(within).includes.char(search_for)
+    end function
+
+    pure function indent_c(string, spaces) result(indented)
+        use iso_varying_string, only: varying_string, var_str
+
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
-        type(VARYING_STRING) :: indented
+        type(varying_string) :: indented
 
-        indented = indent(VAR_STR(string), spaces)
-    end function indentC
+        indented = indent(var_str(string), spaces)
+    end function
 
-    pure function indentS(string, spaces) result(indented)
-        type(VARYING_STRING), intent(in) :: string
+    pure function indent_s(string, spaces) result(indented)
+        use iso_varying_string, only: varying_string, operator(//)
+
+        type(varying_string), intent(in) :: string
         integer, intent(in) :: spaces
-        type(VARYING_STRING) :: indented
+        type(varying_string) :: indented
 
-        indented = repeat(" ", spaces) // hangingIndent(string, spaces)
-    end function indentS
+        indented = repeat(" ", spaces) // hanging_indent(string, spaces)
+    end function
 
-    pure function joinC(strings, separator) result(string)
-        type(VARYING_STRING), intent(in) :: strings(:)
+    pure function join_c(strings, separator) result(string)
+        use iso_varying_string, only: varying_string, var_str
+
+        type(varying_string), intent(in) :: strings(:)
         character(len=*), intent(in) :: separator
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
-        string = join(strings, VAR_STR(separator))
-    end function joinC
+        string = join(strings, var_str(separator))
+    end function
 
-    pure recursive function joinS(strings, separator) result(string)
-        type(VARYING_STRING), intent(in) :: strings(:)
-        type(VARYING_STRING), intent(in) :: separator
-        type(VARYING_STRING) :: string
+    pure recursive function join_s(strings, separator) result(string)
+        use iso_varying_string, only: varying_string, assignment(=), operator(//)
+
+        type(varying_string), intent(in) :: strings(:)
+        type(varying_string), intent(in) :: separator
+        type(varying_string) :: string
 
         integer :: num_strings
 
@@ -258,9 +265,9 @@ contains
                     // separator &
                     // join(strings(2:), separator)
         end if
-    end function joinS
+    end function
 
-    pure function lastCharacterC(string) result(char_)
+    pure function last_character_c(string) result(char_)
         character(len=*), intent(in) :: string
         character(len=1) :: char_
 
@@ -268,49 +275,88 @@ contains
 
         length = len(string)
         char_ = string(length:length)
-    end function lastCharacterC
+    end function
 
-    pure function lastCharacterS(string) result(char_)
-        type(VARYING_STRING), intent(in) :: string
+    pure function last_character_s(string) result(char_)
+        use iso_varying_string, only: varying_string, char
+
+        type(varying_string), intent(in) :: string
         character(len=1) :: char_
 
-        char_ = lastCharacter(char(string))
-    end function lastCharacterS
+        char_ = last_character(char(string))
+    end function
 
-    pure recursive function removeTrailingZerosC(number) result(trimmed)
+    pure recursive function remove_trailing_zeros_c(number) result(trimmed)
+        use iso_varying_string, only: varying_string, assignment(=)
+
         character(len=*), intent(in) :: number
-        type(VARYING_STRING) :: trimmed
+        type(varying_string) :: trimmed
 
-        if (lastCharacter(number) == "0") then
-            trimmed = removeTrailingZeros(withoutLastCharacter(number))
+        if (last_character(number) == "0") then
+            trimmed = remove_trailing_zeros(without_last_character(number))
         else
             trimmed = number
         end if
-    end function removeTrailingZerosC
+    end function
 
-    pure recursive function removeTrailingZerosS(number) result(trimmed)
-        type(VARYING_STRING), intent(in) :: number
-        type(VARYING_STRING) :: trimmed
+    pure recursive function remove_trailing_zeros_s(number) result(trimmed)
+        use iso_varying_string, only: varying_string, char
 
-        trimmed = removeTrailingZeros(char(number))
-    end function removeTrailingZerosS
+        type(varying_string), intent(in) :: number
+        type(varying_string) :: trimmed
 
-    function readFileC(filename) result(contents)
+        trimmed = remove_trailing_zeros(char(number))
+    end function
+
+    function read_file_c(filename) result(contents)
+        use iso_fortran_env, only: IOSTAT_END
+        use iso_varying_string, only: varying_string, operator(//), get
+
         character(len=*), intent(in) :: filename
-        type(VARYING_STRING) :: contents
+        type(varying_string) :: contents
+
+        integer :: file_unit
+        integer :: stat
+        type(varying_string) :: tmp
+
+        open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
+        call get(file_unit, contents, iostat = stat)
+        if (stat == IOSTAT_END) return
+        do
+            call get(file_unit, tmp, iostat = stat)
+            if (stat == iostat_end) exit
+            contents = contents // NEWLINE // tmp
+        end do
+        close(file_unit)
+    end function
+
+    function read_file_s(filename) result(contents)
+        use iso_varying_string, only: varying_string, char
+
+        type(varying_string), intent(in) :: filename
+        type(varying_string) :: contents
+
+        contents = read_file(char(filename))
+    end function
+
+    function read_file_lines_c(filename) result(lines)
+        use iso_fortran_env, only: IOSTAT_END
+        use iso_varying_string, only: varying_string, get
+
+        character(len=*), intent(in) :: filename
+        type(varying_string), allocatable :: lines(:)
 
         integer :: file_unit
         integer :: i
-        type(VARYING_STRING), allocatable :: lines(:)
         integer :: num_lines
         integer :: stat
-        type(VARYING_STRING) :: tmp
+        type(varying_string) :: tmp
 
         open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
         num_lines = 0
         do
             call get(file_unit, tmp, iostat = stat)
-            if (stat == iostat_end) exit
+            if (stat == IOSTAT_END) exit
             num_lines = num_lines + 1
         end do
         rewind(file_unit)
@@ -320,69 +366,38 @@ contains
             call get(file_unit, lines(i))
         end do
         close(file_unit)
+    end function
 
-        contents = join(lines, NEWLINE)
-    end function readFileC
+    function read_file_lines_s(filename) result(lines)
+        use iso_varying_string, only: varying_string, char
 
-    function readFileS(filename) result(contents)
-        type(VARYING_STRING), intent(in) :: filename
-        type(VARYING_STRING) :: contents
+        type(varying_string), intent(in) :: filename
+        type(varying_string), allocatable :: lines(:)
 
-        contents = readFile(char(filename))
-    end function readFileS
+        lines = read_file_lines(char(filename))
+    end function
 
-    function readFileLinesC(filename) result(lines)
-        character(len=*), intent(in) :: filename
-        type(VARYING_STRING), allocatable :: lines(:)
-
-        integer :: file_unit
-        integer :: i
-        integer :: num_lines
-        integer :: stat
-        type(VARYING_STRING) :: tmp
-
-        open(newunit = file_unit, file = filename, action = "READ", status = "OLD")
-        num_lines = 0
-        do
-            call get(file_unit, tmp, iostat = stat)
-            if (stat == iostat_end) exit
-            num_lines = num_lines + 1
-        end do
-        rewind(file_unit)
-
-        allocate(lines(num_lines))
-        do i = 1, num_lines
-            call get(file_unit, lines(i))
-        end do
-        close(file_unit)
-    end function readFileLinesC
-
-    function readFileLinesS(filename) result(lines)
-        type(VARYING_STRING), intent(in) :: filename
-        type(VARYING_STRING), allocatable :: lines(:)
-
-        lines = readFileLines(char(filename))
-    end function readFileLinesS
-
-    pure recursive function splitAtCC( &
+    pure recursive function split_at_cc( &
             string, split_characters) result(strings)
+        use iso_varying_string, only: varying_string, assignment(=)
+
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: split_characters
-        type(VARYING_STRING), allocatable :: strings(:)
+        type(varying_string), allocatable :: strings(:)
 
         if (len(split_characters) > 0) then
             if (len(string) > 0) then
-                if (split_characters.includes.firstCharacter(string)) then
-                    allocate(strings, source = splitAt( &
-                            withoutFirstCharacter(string), &
+                if (split_characters.includes.first_character(string)) then
+                    allocate(strings, source = split_at( &
+                            without_first_character(string), &
                             split_characters))
-                else if (split_characters.includes.lastCharacter(string)) then
-                    allocate(strings, source = splitAt( &
-                            withoutLastCharacter(string), &
+                else if (split_characters.includes.last_character(string)) then
+                    allocate(strings, source = split_at( &
+                            without_last_character(string), &
                             split_characters))
                 else
                     allocate(strings, source = &
-                        doSplit(string, split_characters))
+                        do_split(string, split_characters))
                 end if
             else
                 allocate(strings(0))
@@ -392,15 +407,17 @@ contains
             strings(1) = string
         end if
     contains
-        pure recursive function doSplit(string_, split_characters_) result(strings_)
+        pure recursive function do_split(string_, split_characters_) result(strings_)
+            use iso_varying_string, only: varying_string, assignment(=)
+
             character(len=*), intent(in) :: string_
             character(len=*), intent(in) :: split_characters_
-            type(VARYING_STRING), allocatable :: strings_(:)
+            type(varying_string), allocatable :: strings_(:)
 
             integer :: i
-            type(VARYING_STRING), allocatable :: rest(:)
+            type(varying_string), allocatable :: rest(:)
             integer :: string_length_
-            type(VARYING_STRING) :: this_string
+            type(varying_string) :: this_string
 
             string_length_ = len(string_)
             do i = 2, string_length_
@@ -409,7 +426,7 @@ contains
             if (i < string_length_) then
                 this_string = string_(1:i - 1)
                 allocate(rest, source = &
-                        splitAt(string_(i + 1:), split_characters_))
+                        split_at(string_(i + 1:), split_characters_))
                 allocate(strings_(size(rest) + 1))
                 strings_(1) = this_string
                 strings_(2:) = rest(:)
@@ -417,152 +434,184 @@ contains
                 allocate(strings_(1))
                 strings_(1) = string_
             end if
-        end function doSplit
-    end function splitAtCC
+        end function
+    end function
 
-    pure function splitAtCS(string, split_characters) result(strings)
+    pure function split_at_cs(string, split_characters) result(strings)
+        use iso_varying_string, only: varying_string, char
+
         character(len=*), intent(in) :: string
-        type(VARYING_STRING), intent(in) :: split_characters
-        type(VARYING_STRING), allocatable :: strings(:)
+        type(varying_string), intent(in) :: split_characters
+        type(varying_string), allocatable :: strings(:)
 
-        allocate(strings, source = splitAt(string, char(split_characters)))
-    end function splitAtCS
+        allocate(strings, source = split_at(string, char(split_characters)))
+    end function
 
-    pure function splitAtSC(string, split_characters) result(strings)
-        type(VARYING_STRING), intent(in) :: string
+    pure recursive function split_at_sc(string, split_characters) result(strings)
+        use iso_varying_string, only: varying_string, char
+
+        type(varying_string), intent(in) :: string
         character(len=*), intent(in) :: split_characters
-        type(VARYING_STRING), allocatable :: strings(:)
+        type(varying_string), allocatable :: strings(:)
 
-        allocate(strings, source = splitAt(char(string), split_characters))
-    end function splitAtSC
+        allocate(strings, source = split_at(char(string), split_characters))
+    end function
 
-    pure function splitAtSS(string, split_characters) result(strings)
-        type(VARYING_STRING), intent(in) :: string
-        type(VARYING_STRING), intent(in) :: split_characters
-        type(VARYING_STRING), allocatable :: strings(:)
+    pure function split_at_ss(string, split_characters) result(strings)
+        use iso_varying_string, only: varying_string, char
 
-        allocate(strings, source = splitAt(char(string), char(split_characters)))
-    end function splitAtSS
+        type(varying_string), intent(in) :: string
+        type(varying_string), intent(in) :: split_characters
+        type(varying_string), allocatable :: strings(:)
 
-    pure function startsWithCC(string, substring)
+        allocate(strings, source = split_at(char(string), char(split_characters)))
+    end function
+
+    pure function starts_with_cc(string, substring)
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: substring
-        logical :: startsWithCC
+        logical :: starts_with_cc
 
-        startsWithCC = index(string, substring) == 1
-    end function startsWithCC
+        starts_with_cc = index(string, substring) == 1
+    end function
 
-    pure function startsWithCS(string, substring)
+    pure function starts_with_cs(string, substring)
+        use iso_varying_string, only: varying_string, char
+
         character(len=*), intent(in) :: string
-        type(VARYING_STRING), intent(in) :: substring
-        logical :: startsWithCS
+        type(varying_string), intent(in) :: substring
+        logical :: starts_with_cs
 
-        startsWithCS = string.startsWith.char(substring)
-    end function startsWithCS
+        starts_with_cs = string.startswith.char(substring)
+    end function
 
-    pure function startsWithSC(string, substring)
-        type(VARYING_STRING), intent(in) :: string
+    pure function starts_with_sc(string, substring)
+        use iso_varying_string, only: varying_string, char
+
+        type(varying_string), intent(in) :: string
         character(len=*), intent(in) :: substring
-        logical :: startsWithSC
+        logical :: starts_with_sc
 
-        startsWithSC = char(string).startsWith.substring
-    end function startsWithSC
+        starts_with_sc = char(string).startswith.substring
+    end function
 
-    pure function startsWithSS(string, substring)
-        type(VARYING_STRING), intent(in) :: string
-        type(VARYING_STRING), intent(in) :: substring
-        logical :: startsWithSS
+    pure function starts_with_ss(string, substring)
+        use iso_varying_string, only: varying_string, char
 
-        startsWithSS = char(string).startsWith.char(substring)
-    end function startsWithSS
+        type(varying_string), intent(in) :: string
+        type(varying_string), intent(in) :: substring
+        logical :: starts_with_ss
 
-    pure function toStringInt8(number) result(string)
+        starts_with_ss = char(string).startswith.char(substring)
+    end function
+
+    pure function to_string_int8(number) result(string)
+        use iso_fortran_env, only: INT8
+        use iso_varying_string, only: varying_string, assignment(=)
+
         integer(INT8), intent(in) :: number
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
         character(len=4) :: temp
 
         write(temp, '(I0)') number
         string = trim(temp)
-    end function toStringInt8
+    end function
 
-    pure function toStringInt16(number) result(string)
+    pure function to_string_int16(number) result(string)
+        use iso_fortran_env, only: INT16
+        use iso_varying_string, only: varying_string, assignment(=)
+
         integer(INT16), intent(in) :: number
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
         character(len=6) :: temp
 
         write(temp, '(I0)') number
         string = trim(temp)
-    end function toStringInt16
+    end function
 
-    pure function toStringInt32(number) result(string)
+    pure function to_string_int32(number) result(string)
+        use iso_fortran_env, only: INT32
+        use iso_varying_string, only: varying_string, assignment(=)
+
         integer(INT32), intent(in) :: number
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
         character(len=11) :: temp
 
         write(temp, '(I0)') number
         string = trim(temp)
-    end function toStringInt32
+    end function
 
-    pure function toStringInt64(number) result(string)
+    pure function to_string_int64(number) result(string)
+        use iso_fortran_env, only: INT64
+        use iso_varying_string, only: varying_string, assignment(=)
+
         integer(INT64), intent(in) :: number
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
         character(len=20) :: temp
 
         write(temp, '(I0)') number
         string = trim(temp)
-    end function toStringInt64
+    end function
 
-    pure function toStringLogical(logical_) result(string)
+    pure function to_string_logical(logical_) result(string)
+        use iso_varying_string, only: varying_string, assignment(=)
+
         logical, intent(in) :: logical_
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
         if (logical_) then
             string = "TRUE"
         else
             string = "FALSE"
         end if
-    end function toStringLogical
+    end function
 
-    pure function toStringReal32(number) result(string)
+    pure function to_string_real32(number) result(string)
+        use iso_fortran_env, only: REAL32
+        use iso_varying_string, only: varying_string
+
         real(REAL32), intent(in) :: number
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
-        string = toString(number, 9)
-    end function toStringReal32
+        string = to_string(number, 9)
+    end function
 
-    pure function toStringReal64(number) result(string)
+    pure function to_string_real64(number) result(string)
+        use iso_fortran_env, only: REAL64
+        use iso_varying_string, only: varying_string
+
         real(REAL64), intent(in) :: number
-        type(VARYING_STRING) :: string
+        type(varying_string) :: string
 
-        string = toString(number, 17)
-    end function toStringReal64
+        string = to_string(number, 17)
+    end function
 
-    ! pure function toStringReal128(number) result(string)
-    !     real(REAL128), intent(in) :: number
-    !     type(VARYING_STRING) :: string
-    !
-    !     string = toString(number, 36)
-    ! end function toStringReal128
+    ! TODO: implement to_string_real128 once conditions described below
+    !       NOTE: the default precision will be 36
 
-    pure function toStringWithSignificantDigitsReal32( &
+    pure function to_string_with_significant_digits_real32( &
             number, significant_digits) result(string_)
+        use iso_fortran_env, only: REAL32
+        use iso_varying_string, only: &
+                varying_string, assignment(=), operator(//), len
+
         real(REAL32), intent(in) :: number
         integer, intent(in) :: significant_digits
-        type(VARYING_STRING) :: string_
+        type(varying_string) :: string_
 
         integer, parameter :: C_LEN = 18
-        real(REAL32), parameter :: MACHINE_TINY = TINY(real(0.0, kind=REAL32))
+        real(REAL32), parameter :: MACHINE_TINY = tiny(real(0.0, kind=REAL32))
         real(REAL32) :: abs_num
         character(len=C_LEN) :: exponent_part
         character(len=C_LEN) :: floating_part
         character(len=7) :: format_string
-        type(VARYING_STRING) :: intermediate
-        type(VARYING_STRING) :: intermediate_basic
-        type(VARYING_STRING) :: intermediate_scientific
+        type(varying_string) :: intermediate
+        type(varying_string) :: intermediate_basic
+        type(varying_string) :: intermediate_scientific
         integer :: scale_
 
         abs_num = abs(number)
@@ -578,8 +627,8 @@ contains
                     abs_num * 1.0D1**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate = &
-                    coverEmptyDecimal( &
-                            removeTrailingZeros(trim(floating_part))) &
+                    cover_empty_decimal( &
+                            remove_trailing_zeros(trim(floating_part))) &
                     // trim(exponent_part)
         else
             write(format_string, '(A,I0,A)') &
@@ -587,16 +636,16 @@ contains
             write(floating_part, format_string) abs_num / 1.0D1**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate_scientific = &
-                    coverEmptyDecimal( &
-                            removeTrailingZeros(trim(floating_part))) &
+                    cover_empty_decimal( &
+                            remove_trailing_zeros(trim(floating_part))) &
                     // trim(exponent_part)
 
             if (scale_ < significant_digits) then
                 write(format_string, '(A,I0,A)') &
                         "(f0.", significant_digits-scale_-1, ")"
                 write(floating_part, format_string) abs_num
-                intermediate_basic = coverEmptyDecimal( &
-                        removeTrailingZeros(trim(floating_part)))
+                intermediate_basic = cover_empty_decimal( &
+                        remove_trailing_zeros(trim(floating_part)))
 
                 if (len(intermediate_scientific) < len(intermediate_basic)) then
                     intermediate = intermediate_scientific
@@ -612,23 +661,27 @@ contains
         else
             string_ = intermediate
         end if
-    end function toStringWithSignificantDigitsReal32
+    end function
 
-    pure function toStringWithSignificantDigitsReal64( &
+    pure function to_string_with_significant_digits_real64( &
             number, significant_digits) result(string_)
+        use iso_fortran_env, only: REAL64
+        use iso_varying_string, only: &
+                varying_string, assignment(=), operator(//), len
+
         real(REAL64), intent(in) :: number
         integer, intent(in) :: significant_digits
-        type(VARYING_STRING) :: string_
+        type(varying_string) :: string_
 
         integer, parameter :: C_LEN = 34
-        real(REAL64), parameter :: MACHINE_TINY = TINY(real(0.0, kind=REAL64))
+        real(REAL64), parameter :: MACHINE_TINY = tiny(real(0.0, kind=REAL64))
         real(REAL64) :: abs_num
         character(len=C_LEN) :: exponent_part
         character(len=C_LEN) :: floating_part
         character(len=7) :: format_string
-        type(VARYING_STRING) :: intermediate
-        type(VARYING_STRING) :: intermediate_basic
-        type(VARYING_STRING) :: intermediate_scientific
+        type(varying_string) :: intermediate
+        type(varying_string) :: intermediate_basic
+        type(varying_string) :: intermediate_scientific
         integer :: scale_
 
         abs_num = abs(number)
@@ -644,8 +697,8 @@ contains
                     abs_num * 1.0D1**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate = &
-                    coverEmptyDecimal( &
-                            removeTrailingZeros(trim(floating_part))) &
+                    cover_empty_decimal( &
+                            remove_trailing_zeros(trim(floating_part))) &
                     // trim(exponent_part)
         else
             write(format_string, '(A,I0,A)') &
@@ -653,16 +706,16 @@ contains
             write(floating_part, format_string) abs_num / 1.0D1**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate_scientific = &
-                    coverEmptyDecimal( &
-                            removeTrailingZeros(trim(floating_part))) &
+                    cover_empty_decimal( &
+                            remove_trailing_zeros(trim(floating_part))) &
                     // trim(exponent_part)
 
             if (scale_ < significant_digits) then
                 write(format_string, '(A,I0,A)') &
                         "(f0.", significant_digits-scale_-1, ")"
                 write(floating_part, format_string) abs_num
-                intermediate_basic = coverEmptyDecimal( &
-                        removeTrailingZeros(trim(floating_part)))
+                intermediate_basic = cover_empty_decimal( &
+                        remove_trailing_zeros(trim(floating_part)))
 
                 if (len(intermediate_scientific) < len(intermediate_basic)) then
                     intermediate = intermediate_scientific
@@ -678,99 +731,46 @@ contains
         else
             string_ = intermediate
         end if
-    end function toStringWithSignificantDigitsReal64
+    end function
 
-    ! pure function toStringWithSignificantDigitsReal128( &
-    !         number, significant_digits) result(string_)
-    !     real(REAL128), intent(in) :: number
-    !     integer, intent(in) :: significant_digits
-    !     type(VARYING_STRING) :: string_
-    !
-    !     integer, parameter :: C_LEN = 72
-    !     real(REAL128), parameter :: MACHINE_TINY = TINY(real(0.0, kind=REAL128))
-    !     real(REAL128) :: abs_num
-    !     character(len=C_LEN) :: exponent_part
-    !     character(len=C_LEN) :: floating_part
-    !     character(len=7) :: format_string
-    !     type(VARYING_STRING) :: intermediate
-    !     type(VARYING_STRING) :: intermediate_basic
-    !     type(VARYING_STRING) :: intermediate_scientific
-    !     integer :: scale_
-    !
-    !     abs_num = abs(number)
-    !     if (abs_num <= MACHINE_TINY) then
-    !         string_ = "0.0"
-    !         return
-    !     end if
-    !     scale_ = floor(log10(abs_num))
-    !     if (scale_ <= -2) then
-    !         write(format_string, '(A,I0,A)') &
-    !                 "(f0.", significant_digits-1, ")"
-    !         write(floating_part, format_string) &
-    !                 abs_num * 1.0D1**(-scale_)
-    !         write(exponent_part, '(A,I0)') 'e', scale_
-    !         intermediate = &
-    !                 coverEmptyDecimal( &
-    !                         removeTrailingZeros(trim(floating_part))) &
-    !                 // trim(exponent_part)
-    !     else
-    !         write(format_string, '(A,I0,A)') &
-    !                 "(f0.", significant_digits-1, ")"
-    !         write(floating_part, format_string) abs_num / 1.0D1**scale_
-    !         write(exponent_part, '(A,I0)') 'e', scale_
-    !         intermediate_scientific = &
-    !                 coverEmptyDecimal( &
-    !                         removeTrailingZeros(trim(floating_part))) &
-    !                 // trim(exponent_part)
-    !
-    !         if (scale_ < significant_digits) then
-    !             write(format_string, '(A,I0,A)') &
-    !                     "(f0.", significant_digits-scale_-1, ")"
-    !             write(floating_part, format_string) abs_num
-    !             intermediate_basic = coverEmptyDecimal( &
-    !                     removeTrailingZeros(trim(floating_part)))
-    !
-    !             if (len(intermediate_scientific) < len(intermediate_basic)) then
-    !                 intermediate = intermediate_scientific
-    !             else
-    !                 intermediate = intermediate_basic
-    !             end if
-    !         else
-    !             intermediate = intermediate_scientific
-    !         end if
-    !     end if
-    !     if (number < 0.0D0) then
-    !         string_ = "-" // intermediate
-    !     else
-    !         string_ = intermediate
-    !     end if
-    ! end function toStringWithSignificantDigitsReal128
+    ! TODO: implement to_string_with_significant_digits_real128
+    !       once REAL128 is sufficiently portable, or the ifdef
+    !       to conditionally include it is sufficiently portable.
+    !       NOTE: C_LEN will be 72
 
-    pure function withoutFirstCharacterC(string) result(trimmed)
+    pure function without_first_character_c(string) result(trimmed)
+        use iso_varying_string, only: varying_string, assignment(=)
+
         character(len=*), intent(in) :: string
-        type(VARYING_STRING) :: trimmed
+        type(varying_string) :: trimmed
 
         trimmed = string(2:)
-    end function withoutFirstCharacterC
+    end function
 
-    pure function withoutFirstCharacterS(string) result(trimmed)
-        type(VARYING_STRING), intent(in) :: string
-        type(VARYING_STRING) :: trimmed
+    pure function without_first_character_s(string) result(trimmed)
+        use iso_varying_string, only: varying_string, char
 
-        trimmed = withoutFirstCharacter(char(string))
-    end function withoutFirstCharacterS
+        type(varying_string), intent(in) :: string
+        type(varying_string) :: trimmed
 
-    pure function withoutLastCharacterC(string) result(trimmed)
+        trimmed = without_first_character(char(string))
+    end function
+
+    pure function without_last_character_c(string) result(trimmed)
+        use iso_varying_string, only: varying_string, assignment(=)
+
         character(len=*), intent(in) :: string
-        type(VARYING_STRING) :: trimmed
+        type(varying_string) :: trimmed
 
         trimmed = string(1:len(string) - 1)
-    end function withoutLastCharacterC
+    end function
 
-    pure function withoutLastCharacterS(string) result(trimmed)
-        type(VARYING_STRING), intent(in) :: string
-        type(VARYING_STRING) :: trimmed
+    pure function without_last_character_s(string) result(trimmed)
+        use iso_varying_string, only: varying_string, char
 
-        trimmed = withoutLastCharacter(char(string))
-    end function withoutLastCharacterS
-end module strff
+        type(varying_string), intent(in) :: string
+        type(varying_string) :: trimmed
+
+        trimmed = without_last_character(char(string))
+    end function
+end module
