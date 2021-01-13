@@ -1,28 +1,34 @@
 module read_file_lines_test
+    use iso_fortran_env, only: IOSTAT_END
+    use iso_varying_string, only: varying_string, operator(//), get, put
+    use strff, only: read_file_lines, split_at, NEWLINE
+    use text_m, only: TEST_TEXT
+    use vegetables, only: &
+            test_item_t, &
+            result_t, &
+            assert_equals, &
+            assert_faster_than, &
+            describe, &
+            it
+
     implicit none
     private
 
     public :: test_read_file_lines
 contains
     function test_read_file_lines() result(tests)
-        use vegetables, only: test_item_t, describe, it
-
         type(test_item_t) :: tests
 
-        type(test_item_t) :: individual_tests(2)
-
-        individual_tests(1) = it( &
-                "gets the contents from the file", check_read_file_lines)
-        individual_tests(2) = it( &
-                "is faster than an alternative implementation", check_speed)
-        tests = describe("read_file_lines", individual_tests)
+        tests = describe( &
+                "read_file_lines", &
+                [ it( &
+                        "gets the contents from the file", check_read_file_lines) &
+                , it( &
+                        "is faster than an alternative implementation", check_speed) &
+                ])
     end function
 
     function check_read_file_lines() result(result_)
-        use iso_varying_string, only: varying_string, put
-        use strff, only: read_file_lines, NEWLINE
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         character(len=*), parameter :: FIRST_LINE = "First Line"
@@ -52,10 +58,6 @@ contains
     end function
 
     function check_speed() result(result_)
-        use iso_varying_string, only: varying_string, put
-        use text_m, only: TEST_TEXT
-        use vegetables, only: result_t, assert_faster_than
-
         type(result_t) :: result_
 
         character(len=*), parameter :: TEMP_FILE_NAME = "read_file_lines_speed_tmp.txt"
@@ -72,8 +74,6 @@ contains
         close(file_unit, status = "DELETE")
     contains
         subroutine do_fast_read
-            use strff, only: read_file_lines
-
             lines = read_file_lines(TEMP_FILE_NAME)
         end subroutine
 
@@ -83,10 +83,6 @@ contains
     end function
 
     function alt_read_file_lines(filename) result(lines)
-        use iso_fortran_env, only: IOSTAT_END
-        use iso_varying_string, only: varying_string, operator(//), get
-        use strff, only: split_at, NEWLINE
-
         character(len=*), intent(in) :: filename
         type(varying_string), allocatable :: lines(:)
 

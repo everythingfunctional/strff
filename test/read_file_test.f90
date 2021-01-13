@@ -1,29 +1,27 @@
 module read_file_test
+    use iso_varying_string, only: put
+    use strff, only: read_file, NEWLINE
+    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+
     implicit none
     private
 
     public :: test_read_file
 contains
     function test_read_file() result(tests)
-        use vegetables, only: test_item_t, describe, it
-
         type(test_item_t) :: tests
 
-        type(test_item_t) :: individual_tests(1)
-
-        individual_tests(1) = it("gets the contents from the file", check_read_file)
-        ! The performance of one implementation over another appears to be
-        ! based heavily on platform, so we don't bother testing it for now.
-        ! individual_tests(2) = it( &
-        !         "is faster than an alternative implementation", check_speed)
-        tests = describe("read_file", individual_tests)
+        tests = describe( &
+                "read_file", &
+                [ it("gets the contents from the file", check_read_file) &
+                ! The performance of one implementation over another appears to be
+                ! based heavily on platform, so we don't bother testing it for now.
+                !, it( &
+                !         "is faster than an alternative implementation", check_speed) &
+                ])
     end function
 
     function check_read_file() result(result_)
-        use iso_varying_string, only: put
-        use strff, only: read_file, NEWLINE
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         character(len=*), parameter :: FILE_CONTENTS = &

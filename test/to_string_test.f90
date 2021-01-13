@@ -1,52 +1,46 @@
 module to_string_test
+    use strff, only: to_string
+    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+
     implicit none
     private
 
     public :: test_to_string_for_doubles, test_to_string_for_integers
 contains
     function test_to_string_for_doubles() result(tests)
-        use vegetables, only: test_item_t, describe, it
-
         type(test_item_t) :: tests
 
-        type(test_item_t) :: individual_tests(6)
-
-        individual_tests(1) = it( &
-                "includes zero after the decimal", &
-                check_includes_zero_after_decimal)
-        individual_tests(2) = it( &
-                "only keeps the specified number of digits", &
-                check_only_keeps_six_digits)
-        individual_tests(3) = it( &
-                "handles zero correctly", &
-                check_handles_zero)
-        individual_tests(4) = it( &
-                "handles extreme numbers correctly", &
-                check_handles_extreme_numbers)
-        individual_tests(5) = it( &
-                "can do negative numbers", &
-                check_negative_numbers)
-        individual_tests(6) = it( &
-                "shortens round numbers with scientific notation", &
-                check_round_numbers)
-        tests = describe("to_string for doubles", individual_tests)
+        tests = describe( &
+                "to_string for doubles", &
+                [ it( &
+                        "includes zero after the decimal", &
+                        check_includes_zero_after_decimal) &
+                , it( &
+                        "only keeps the specified number of digits", &
+                        check_only_keeps_six_digits) &
+                , it("handles zero correctly", check_handles_zero) &
+                , it( &
+                        "handles extreme numbers correctly", &
+                        check_handles_extreme_numbers) &
+                , it( &
+                        "can do negative numbers", &
+                        check_negative_numbers) &
+                , it( &
+                        "shortens round numbers with scientific notation", &
+                        check_round_numbers) &
+                ])
     end function
 
     function test_to_string_for_integers() result(tests)
-        use vegetables, only: test_item_t, describe, it
-
         type(test_item_t) :: tests
 
-        type(test_item_t) :: individual_tests(1)
-
-        individual_tests(1) = it("works", checkto_string_for_integers)
-        tests = describe("to_string for integers", individual_tests)
+        tests = describe( &
+                "to_string for integers", &
+                [ it("works", check_to_string_for_integers) &
+                ])
     end function
 
     pure function check_includes_zero_after_decimal() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         result_ = &
@@ -55,9 +49,6 @@ contains
     end function
 
     pure function check_only_keeps_six_digits() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         result_ = &
@@ -72,9 +63,6 @@ contains
     end function
 
     pure function check_handles_zero() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         result_ = &
@@ -83,9 +71,6 @@ contains
     end function
 
     pure function check_handles_extreme_numbers() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         result_ = &
@@ -104,9 +89,6 @@ contains
     end function
 
     pure function check_negative_numbers() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         result_ = &
@@ -118,18 +100,12 @@ contains
     end function
 
     pure function check_round_numbers() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
         type(result_t) :: result_
 
         result_ = assert_equals("1.0e6", to_string(1.0D6))
     end function
 
-    pure function checkto_string_for_integers() result(result_)
-        use strff, only: to_string
-        use vegetables, only: result_t, assert_equals
-
+    pure function check_to_string_for_integers() result(result_)
         type(result_t) :: result_
 
         result_ = &
