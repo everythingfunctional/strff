@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.14)
 project(
   "strff"
   LANGUAGES "Fortran"
-  VERSION "2.0.1"
+  VERSION "2.1.0"
 )
 
 option(INSTALL_PROJECT "Whether this project should be installed" TRUE)
