@@ -122,7 +122,7 @@ module strff
 
     character(len=*), parameter :: NEWLINE = NEW_LINE('A')
 contains
-    pure function cover_empty_decimal_c(number) result(fixed)
+    elemental function cover_empty_decimal_c(number) result(fixed)
         character(len=*), intent(in) :: number
         type(varying_string) :: fixed
 
@@ -135,28 +135,28 @@ contains
         end if
     end function
 
-    pure function cover_empty_decimal_s(number) result(fixed)
+    elemental function cover_empty_decimal_s(number) result(fixed)
         type(varying_string), intent(in) :: number
         type(varying_string) :: fixed
 
         fixed = cover_empty_decimal(char(number))
     end function
 
-    pure function first_character_c(string) result(char_)
+    elemental function first_character_c(string) result(char_)
         character(len=*), intent(in) :: string
         character(len=1) :: char_
 
         char_ = string(1:1)
     end function
 
-    pure function first_character_s(string) result(char_)
+    elemental function first_character_s(string) result(char_)
         type(varying_string), intent(in) :: string
         character(len=1) :: char_
 
         char_ = first_character(char(string))
     end function
 
-    pure function hanging_indent_c(string, spaces) result(indented)
+    elemental function hanging_indent_c(string, spaces) result(indented)
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
         type(varying_string) :: indented
@@ -164,7 +164,7 @@ contains
         indented = hanging_indent(var_str(string), spaces)
     end function
 
-    pure function hanging_indent_s(string, spaces) result(indented)
+    elemental function hanging_indent_s(string, spaces) result(indented)
         type(varying_string), intent(in) :: string
         integer, intent(in) :: spaces
         type(varying_string) :: indented
@@ -172,7 +172,7 @@ contains
         indented = join(split_at(string, NEWLINE), NEWLINE // repeat(" ", spaces))
     end function
 
-    pure function includes_cc(within, search_for)
+    elemental function includes_cc(within, search_for)
         character(len=*), intent(in) :: within
         character(len=*), intent(in) :: search_for
         logical :: includes_cc
@@ -180,7 +180,7 @@ contains
         includes_cc = index(within, search_for) > 0
     end function
 
-    pure function includes_cs(within, search_for)
+    elemental function includes_cs(within, search_for)
         character(len=*), intent(in) :: within
         type(varying_string), intent(in) :: search_for
         logical :: includes_cs
@@ -188,7 +188,7 @@ contains
         includes_cs = within.includes.char(search_for)
     end function
 
-    pure function includes_sc(within, search_for)
+    elemental function includes_sc(within, search_for)
         type(varying_string), intent(in) :: within
         character(len=*), intent(in) :: search_for
         logical :: includes_sc
@@ -196,7 +196,7 @@ contains
         includes_sc = char(within).includes.search_for
     end function
 
-    pure function includes_ss(within, search_for)
+    elemental function includes_ss(within, search_for)
         type(varying_string), intent(in) :: within
         type(varying_string), intent(in) :: search_for
         logical :: includes_ss
@@ -204,7 +204,7 @@ contains
         includes_ss = char(within).includes.char(search_for)
     end function
 
-    pure function indent_c(string, spaces) result(indented)
+    elemental function indent_c(string, spaces) result(indented)
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
         type(varying_string) :: indented
@@ -212,7 +212,7 @@ contains
         indented = indent(var_str(string), spaces)
     end function
 
-    pure function indent_s(string, spaces) result(indented)
+    elemental function indent_s(string, spaces) result(indented)
         type(varying_string), intent(in) :: string
         integer, intent(in) :: spaces
         type(varying_string) :: indented
@@ -248,7 +248,7 @@ contains
         end if
     end function
 
-    pure function last_character_c(string) result(char_)
+    elemental function last_character_c(string) result(char_)
         character(len=*), intent(in) :: string
         character(len=1) :: char_
 
@@ -258,14 +258,14 @@ contains
         char_ = string(length:length)
     end function
 
-    pure function last_character_s(string) result(char_)
+    elemental function last_character_s(string) result(char_)
         type(varying_string), intent(in) :: string
         character(len=1) :: char_
 
         char_ = last_character(char(string))
     end function
 
-    pure recursive function remove_trailing_zeros_c(number) result(trimmed)
+    elemental recursive function remove_trailing_zeros_c(number) result(trimmed)
         character(len=*), intent(in) :: number
         type(varying_string) :: trimmed
 
@@ -276,14 +276,14 @@ contains
         end if
     end function
 
-    pure recursive function remove_trailing_zeros_s(number) result(trimmed)
+    elemental recursive function remove_trailing_zeros_s(number) result(trimmed)
         type(varying_string), intent(in) :: number
         type(varying_string) :: trimmed
 
         trimmed = remove_trailing_zeros(char(number))
     end function
 
-    function read_file_c(filename) result(contents)
+    impure elemental function read_file_c(filename) result(contents)
         character(len=*), intent(in) :: filename
         type(varying_string) :: contents
 
@@ -302,7 +302,7 @@ contains
         close(file_unit)
     end function
 
-    function read_file_s(filename) result(contents)
+    impure elemental function read_file_s(filename) result(contents)
         type(varying_string), intent(in) :: filename
         type(varying_string) :: contents
 
@@ -422,7 +422,7 @@ contains
         allocate(strings, source = split_at(char(string), char(split_characters)))
     end function
 
-    pure function starts_with_cc(string, substring)
+    elemental function starts_with_cc(string, substring)
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: substring
         logical :: starts_with_cc
@@ -430,7 +430,7 @@ contains
         starts_with_cc = index(string, substring) == 1
     end function
 
-    pure function starts_with_cs(string, substring)
+    elemental function starts_with_cs(string, substring)
         character(len=*), intent(in) :: string
         type(varying_string), intent(in) :: substring
         logical :: starts_with_cs
@@ -438,7 +438,7 @@ contains
         starts_with_cs = string.startswith.char(substring)
     end function
 
-    pure function starts_with_sc(string, substring)
+    elemental function starts_with_sc(string, substring)
         type(varying_string), intent(in) :: string
         character(len=*), intent(in) :: substring
         logical :: starts_with_sc
@@ -446,7 +446,7 @@ contains
         starts_with_sc = char(string).startswith.substring
     end function
 
-    pure function starts_with_ss(string, substring)
+    elemental function starts_with_ss(string, substring)
         type(varying_string), intent(in) :: string
         type(varying_string), intent(in) :: substring
         logical :: starts_with_ss
@@ -454,7 +454,7 @@ contains
         starts_with_ss = char(string).startswith.char(substring)
     end function
 
-    pure function to_string_int8(number) result(string)
+    elemental function to_string_int8(number) result(string)
         integer(INT8), intent(in) :: number
         type(varying_string) :: string
 
@@ -464,7 +464,7 @@ contains
         string = trim(temp)
     end function
 
-    pure function to_string_int16(number) result(string)
+    elemental function to_string_int16(number) result(string)
         integer(INT16), intent(in) :: number
         type(varying_string) :: string
 
@@ -474,7 +474,7 @@ contains
         string = trim(temp)
     end function
 
-    pure function to_string_int32(number) result(string)
+    elemental function to_string_int32(number) result(string)
         integer(INT32), intent(in) :: number
         type(varying_string) :: string
 
@@ -484,7 +484,7 @@ contains
         string = trim(temp)
     end function
 
-    pure function to_string_int64(number) result(string)
+    elemental function to_string_int64(number) result(string)
         integer(INT64), intent(in) :: number
         type(varying_string) :: string
 
@@ -494,7 +494,7 @@ contains
         string = trim(temp)
     end function
 
-    pure function to_string_logical(logical_) result(string)
+    elemental function to_string_logical(logical_) result(string)
         logical, intent(in) :: logical_
         type(varying_string) :: string
 
@@ -505,14 +505,14 @@ contains
         end if
     end function
 
-    pure function to_string_real32(number) result(string)
+    elemental function to_string_real32(number) result(string)
         real(REAL32), intent(in) :: number
         type(varying_string) :: string
 
         string = to_string(number, 9)
     end function
 
-    pure function to_string_real64(number) result(string)
+    elemental function to_string_real64(number) result(string)
         real(REAL64), intent(in) :: number
         type(varying_string) :: string
 
@@ -522,7 +522,7 @@ contains
     ! TODO: implement to_string_real128 once conditions described below
     !       NOTE: the default precision will be 36
 
-    pure function to_string_with_significant_digits_real32( &
+    elemental function to_string_with_significant_digits_real32( &
             number, significant_digits) result(string_)
         real(REAL32), intent(in) :: number
         integer, intent(in) :: significant_digits
@@ -588,7 +588,7 @@ contains
         end if
     end function
 
-    pure function to_string_with_significant_digits_real64( &
+    elemental function to_string_with_significant_digits_real64( &
             number, significant_digits) result(string_)
         real(REAL64), intent(in) :: number
         integer, intent(in) :: significant_digits
@@ -659,28 +659,28 @@ contains
     !       to conditionally include it is sufficiently portable.
     !       NOTE: C_LEN will be 72
 
-    pure function without_first_character_c(string) result(trimmed)
+    elemental function without_first_character_c(string) result(trimmed)
         character(len=*), intent(in) :: string
         type(varying_string) :: trimmed
 
         trimmed = string(2:)
     end function
 
-    pure function without_first_character_s(string) result(trimmed)
+    elemental function without_first_character_s(string) result(trimmed)
         type(varying_string), intent(in) :: string
         type(varying_string) :: trimmed
 
         trimmed = without_first_character(char(string))
     end function
 
-    pure function without_last_character_c(string) result(trimmed)
+    elemental function without_last_character_c(string) result(trimmed)
         character(len=*), intent(in) :: string
         type(varying_string) :: trimmed
 
         trimmed = string(1:len(string) - 1)
     end function
 
-    pure function without_last_character_s(string) result(trimmed)
+    elemental function without_last_character_s(string) result(trimmed)
         type(varying_string), intent(in) :: string
         type(varying_string) :: trimmed
 
