@@ -5,39 +5,56 @@ program main
     call run()
 contains
     subroutine run()
+        use add_hanging_indentation_test, only: &
+                add_hanging_indentation_add_hanging_indentation => &
+                    test_add_hanging_indentation
         use hanging_indent_test, only: &
-                hanging_indent_hanging_indent => test_hanging_indent
+                hanging_indent_hanging_indent => &
+                    test_hanging_indent
         use indent_test, only: &
-                indent_indent => test_indent
+                indent_indent => &
+                    test_indent
         use join_test, only: &
-                join_join => test_join
+                join_join => &
+                    test_join
         use read_file_lines_test, only: &
-                read_file_lines_read_file_lines => test_read_file_lines
+                read_file_lines_read_file_lines => &
+                    test_read_file_lines
         use read_file_test, only: &
-                read_file_read_file => test_read_file
+                read_file_read_file => &
+                    test_read_file
         use split_at_test, only: &
-                split_at_split_at => test_split_at
+                split_at_split_at => &
+                    test_split_at
         use starts_with_test, only: &
-                starts_with_starts_with => test_starts_with
+                starts_with_starts_with => &
+                    test_starts_with
         use to_string_test, only: &
-                to_string_to_string_for_doubles => test_to_string_for_doubles, &
-                to_string_to_string_for_integers => test_to_string_for_integers
+                to_string_to_string_for_doubles => &
+                    test_to_string_for_doubles, &
+                to_string_to_string_for_integers => &
+                    test_to_string_for_integers
         use vegetables, only: test_item_t, test_that, run_tests
 
-        type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(9)
 
-        individual_tests(1) = hanging_indent_hanging_indent()
-        individual_tests(2) = indent_indent()
-        individual_tests(3) = join_join()
-        individual_tests(4) = read_file_lines_read_file_lines()
-        individual_tests(5) = read_file_read_file()
-        individual_tests(6) = split_at_split_at()
-        individual_tests(7) = starts_with_starts_with()
-        individual_tests(8) = to_string_to_string_for_doubles()
-        individual_tests(9) = to_string_to_string_for_integers()
+
+        type(test_item_t) :: tests
+        type(test_item_t) :: individual_tests(10)
+
+        individual_tests(1) = add_hanging_indentation_add_hanging_indentation()
+        individual_tests(2) = hanging_indent_hanging_indent()
+        individual_tests(3) = indent_indent()
+        individual_tests(4) = join_join()
+        individual_tests(5) = read_file_lines_read_file_lines()
+        individual_tests(6) = read_file_read_file()
+        individual_tests(7) = split_at_split_at()
+        individual_tests(8) = starts_with_starts_with()
+        individual_tests(9) = to_string_to_string_for_doubles()
+        individual_tests(10) = to_string_to_string_for_integers()
         tests = test_that(individual_tests)
 
+
         call run_tests(tests)
+
     end subroutine
 end program

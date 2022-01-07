@@ -2,13 +2,22 @@ module strff
     use iso_fortran_env, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, IOSTAT_END
     use iso_varying_string, only: &
-            varying_string, assignment(=), operator(//), char, get, len, var_str
+            varying_string, &
+            assignment(=), &
+            operator(//), &
+            char, &
+            extract, &
+            get, &
+            len, &
+            replace, &
+            var_str
 
     implicit none
     private
     public :: &
             operator(.includes.), &
             operator(.startswith.), &
+            add_hanging_indentation, &
             cover_empty_decimal, &
             first_character, &
             hanging_indent, &
@@ -37,6 +46,11 @@ module strff
         module procedure starts_with_cs
         module procedure starts_with_sc
         module procedure starts_with_ss
+    end interface
+
+    interface add_hanging_indentation
+        module procedure add_hanging_indentation_c
+        module procedure add_hanging_indentation_s
     end interface
 
     interface cover_empty_decimal
@@ -122,6 +136,31 @@ module strff
 
     character(len=*), parameter :: NEWLINE = NEW_LINE('A')
 contains
+    elemental function add_hanging_indentation_c(string, spaces) result(indented)
+        character(len=*), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(varying_string) :: indented
+
+        indented = add_hanging_indentation(var_str(string), spaces)
+    end function
+
+    elemental function add_hanging_indentation_s(string, spaces) result(indented)
+        type(varying_string), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(varying_string) :: indented
+
+        indented = replace( &
+                replace( &
+                        string // NEWLINE, &
+                        NEWLINE, &
+                        NEWLINE // repeat(" ", spaces), &
+                        every = .true.), &
+                repeat(" ", spaces) // NEWLINE, &
+                NEWLINE, &
+                every = .true.)
+        indented = extract(indented, 1, len(indented) - (1 + spaces))
+    end function
+
     elemental function cover_empty_decimal_c(number) result(fixed)
         character(len=*), intent(in) :: number
         type(varying_string) :: fixed
