@@ -390,19 +390,19 @@ contains
         if (len(split_characters) > 0) then
             if (len(string) > 0) then
                 if (split_characters.includes.first_character(string)) then
-                    allocate(strings, source = split_at( &
+                    allocate(strings, source = [var_str(""), split_at( &
                             without_first_character(string), &
-                            split_characters))
+                            split_characters)])
                 else if (split_characters.includes.last_character(string)) then
-                    allocate(strings, source = split_at( &
+                    allocate(strings, source = [split_at( &
                             without_last_character(string), &
-                            split_characters))
+                            split_characters), var_str("")])
                 else
                     allocate(strings, source = &
                         do_split(string, split_characters))
                 end if
             else
-                allocate(strings(0))
+                allocate(strings, source = [var_str("")])
             end if
         else
             allocate(strings(1))
