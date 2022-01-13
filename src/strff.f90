@@ -435,60 +435,44 @@ contains
         lines = read_file_lines(char(filename))
     end function
 
-    pure recursive function split_at_cc( &
+    pure function split_at_cc( &
             string, split_characters) result(strings)
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(varying_string), allocatable :: strings(:)
 
-        if (len(split_characters) > 0) then
-            if (len(string) > 0) then
-                if (split_characters.includes.first_character(string)) then
-                    allocate(strings, source = [var_str(""), split_at( &
-                            without_first_character(string), &
-                            split_characters)])
-                else if (split_characters.includes.last_character(string)) then
-                    allocate(strings, source = [split_at( &
-                            without_last_character(string), &
-                            split_characters), var_str("")])
-                else
-                    allocate(strings, source = &
-                        do_split(string, split_characters))
-                end if
+        integer :: i
+        integer :: num_substrings
+        integer :: next_sep, prev_sep
+        integer :: string_length
+
+        string_length = len(string)
+        num_substrings = count([(split_characters.includes.string(i:i), i = 1, string_length)]) + 1
+        if (len(split_characters) > 0 .and. num_substrings > 1 .and. string_length > 0) then
+            allocate(strings(num_substrings))
+            prev_sep = scan(string, split_characters)
+            if (prev_sep > 1) then
+                strings(1) = string(1:prev_sep-1)
             else
-                allocate(strings, source = [var_str("")])
+                strings(1) = ""
+            end if
+            do i = 2, num_substrings-1
+                next_sep = scan(string(prev_sep+1:string_length), split_characters) + prev_sep
+                if (next_sep - prev_sep > 1) then
+                    strings(i) = string(prev_sep+1:next_sep-1)
+                else
+                    strings(i) = ""
+                end if
+                prev_sep = next_sep
+            end do
+            if (prev_sep < string_length) then
+                strings(num_substrings) = string(prev_sep+1:string_length)
+            else
+                strings(num_substrings) = ""
             end if
         else
-            allocate(strings(1))
-            strings(1) = string
+            allocate(strings, source = [var_str(string)])
         end if
-    contains
-        pure recursive function do_split(string_, split_characters_) result(strings_)
-            character(len=*), intent(in) :: string_
-            character(len=*), intent(in) :: split_characters_
-            type(varying_string), allocatable :: strings_(:)
-
-            integer :: i
-            type(varying_string), allocatable :: rest(:)
-            integer :: string_length_
-            type(varying_string) :: this_string
-
-            string_length_ = len(string_)
-            do i = 2, string_length_
-                if (split_characters_.includes.string_(i:i)) exit
-            end do
-            if (i < string_length_) then
-                this_string = string_(1:i - 1)
-                allocate(rest, source = &
-                        split_at(string_(i + 1:), split_characters_))
-                allocate(strings_(size(rest) + 1))
-                strings_(1) = this_string
-                strings_(2:) = rest(:)
-            else
-                allocate(strings_(1))
-                strings_(1) = string_
-            end if
-        end function
     end function
 
     pure function split_at_cs(string, split_characters) result(strings)
@@ -499,7 +483,7 @@ contains
         allocate(strings, source = split_at(string, char(split_characters)))
     end function
 
-    pure recursive function split_at_sc(string, split_characters) result(strings)
+    pure function split_at_sc(string, split_characters) result(strings)
         type(varying_string), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(varying_string), allocatable :: strings(:)
