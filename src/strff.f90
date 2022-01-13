@@ -303,7 +303,7 @@ contains
         string = join(strings, var_str(separator))
     end function
 
-    pure recursive function join_s(strings, separator) result(string)
+    pure function join_s(strings, separator) result(string)
         type(varying_string), intent(in) :: strings(:)
         type(varying_string), intent(in) :: separator
         type(varying_string) :: string
@@ -316,10 +316,28 @@ contains
         else if (num_strings == 0) then
             string = ""
         else
-            string = &
-                    strings(1) &
-                    // separator &
-                    // join(strings(2:), separator)
+            block
+                integer :: separator_length
+                integer, dimension(num_strings) :: starts, ends
+                integer :: i
+                character(len=:), allocatable :: whole_string
+
+                separator_length = len(separator)
+                starts(1) = 1
+                ends(1) = len(strings(1))
+                do i = 2, num_strings
+                    starts(i) = ends(i-1) + separator_length + 1
+                    ends(i) = starts(i) + len(strings(i)) - 1
+                end do
+                allocate(character(len=ends(num_strings)) :: whole_string)
+                do concurrent (i = 1:num_strings)
+                    whole_string(starts(i):ends(i)) = strings(i)
+                end do
+                do concurrent (i = 2:num_strings)
+                    whole_string(ends(i-1)+1:starts(i)-1) = separator
+                end do
+                string = whole_string
+            end block
         end if
     end function
 
