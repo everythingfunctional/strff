@@ -43,11 +43,13 @@ contains
         type(result_t) :: result_
 
         character(len=*), parameter :: input = &
-                NEWLINE // "First Line" // NEWLINE // NEWLINE &
+                NEWLINE // "First Line" // NEWLINE &
+                // "  " // NEWLINE &
                 // "Second Line" // NEWLINE &
                 // "Third Line" // NEWLINE
         character(len=*), parameter :: expected = &
-                NEWLINE // "    First Line" // NEWLINE // NEWLINE &
+                NEWLINE // "    First Line" // NEWLINE &
+                // "  " // NEWLINE &
                 // "    Second Line" // NEWLINE &
                 // "    Third Line" // NEWLINE
         type(varying_string) :: actual
