@@ -8,6 +8,9 @@ contains
         use add_hanging_indentation_test, only: &
                 add_hanging_indentation_add_hanging_indentation => &
                     test_add_hanging_indentation
+        use format_hanging_indented_test, only: &
+                format_hanging_indented_format_hanging_indented => &
+                    test_format_hanging_indented
         use hanging_indent_test, only: &
                 hanging_indent_hanging_indent => &
                     test_hanging_indent
@@ -39,18 +42,19 @@ contains
 
 
         type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(10)
+        type(test_item_t) :: individual_tests(11)
 
         individual_tests(1) = add_hanging_indentation_add_hanging_indentation()
-        individual_tests(2) = hanging_indent_hanging_indent()
-        individual_tests(3) = indent_indent()
-        individual_tests(4) = join_join()
-        individual_tests(5) = read_file_lines_read_file_lines()
-        individual_tests(6) = read_file_read_file()
-        individual_tests(7) = split_at_split_at()
-        individual_tests(8) = starts_with_starts_with()
-        individual_tests(9) = to_string_to_string_for_doubles()
-        individual_tests(10) = to_string_to_string_for_integers()
+        individual_tests(2) = format_hanging_indented_format_hanging_indented()
+        individual_tests(3) = hanging_indent_hanging_indent()
+        individual_tests(4) = indent_indent()
+        individual_tests(5) = join_join()
+        individual_tests(6) = read_file_lines_read_file_lines()
+        individual_tests(7) = read_file_read_file()
+        individual_tests(8) = split_at_split_at()
+        individual_tests(9) = starts_with_starts_with()
+        individual_tests(10) = to_string_to_string_for_doubles()
+        individual_tests(11) = to_string_to_string_for_integers()
         tests = test_that(individual_tests)
 
 

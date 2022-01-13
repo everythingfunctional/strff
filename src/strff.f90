@@ -10,6 +10,7 @@ module strff
             get, &
             len, &
             replace, &
+            verify, &
             var_str
 
     implicit none
@@ -20,6 +21,7 @@ module strff
             add_hanging_indentation, &
             cover_empty_decimal, &
             first_character, &
+            format_hanging_indented, &
             hanging_indent, &
             includes, &
             indent, &
@@ -61,6 +63,11 @@ module strff
     interface first_character
         module procedure first_character_c
         module procedure first_character_s
+    end interface
+
+    interface format_hanging_indented
+        module procedure format_hanging_indented_c
+        module procedure format_hanging_indented_s
     end interface
 
     interface hanging_indent
@@ -193,6 +200,35 @@ contains
         character(len=1) :: char_
 
         char_ = first_character(char(string))
+    end function
+
+    elemental function format_hanging_indented_c(string, spaces) result(indented)
+        character(len=*), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(varying_string) :: indented
+
+        indented = format_hanging_indented(var_str(string), spaces)
+    end function
+
+    elemental function format_hanging_indented_s(string, spaces) result(indented)
+        type(varying_string), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(varying_string) :: indented
+
+        logical, allocatable :: blank_lines(:)
+        integer :: i
+        type(varying_string), allocatable :: lines(:)
+
+        lines = split_at(string, NEWLINE)
+        blank_lines = verify(lines, " ") == 0
+        where (blank_lines) lines = ""
+        if (.not.blank_lines(1)) lines(1) = extract(lines(1), verify(lines(1), " "))
+        do concurrent (i = 2:size(lines), .not.blank_lines(i))
+            lines(i) = &
+                    merge(var_str(repeat(" ", spaces)), var_str(""), .not.blank_lines(i-1)) &
+                    // extract(lines(i), verify(lines(i), " "))
+        end do
+        indented = join(lines, NEWLINE)
     end function
 
     elemental function hanging_indent_c(string, spaces) result(indented)
