@@ -292,7 +292,7 @@ contains
         integer, intent(in) :: spaces
         type(varying_string) :: indented
 
-        indented = repeat(" ", spaces) // hanging_indent(string, spaces)
+        indented = repeat(" ", spaces) // add_hanging_indentation(string, spaces)
     end function
 
     pure function join_c(strings, separator) result(string)
