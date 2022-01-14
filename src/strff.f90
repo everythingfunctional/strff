@@ -2,16 +2,26 @@ module strff
     use iso_fortran_env, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, IOSTAT_END
     use iso_varying_string, only: &
-            varying_string, assignment(=), operator(//), char, get, len, var_str
+            varying_string, &
+            assignment(=), &
+            operator(//), &
+            char, &
+            extract, &
+            get, &
+            len, &
+            replace, &
+            verify, &
+            var_str
 
     implicit none
     private
     public :: &
             operator(.includes.), &
             operator(.startswith.), &
+            add_hanging_indentation, &
             cover_empty_decimal, &
             first_character, &
-            hanging_indent, &
+            format_hanging_indented, &
             includes, &
             indent, &
             join, &
@@ -39,6 +49,11 @@ module strff
         module procedure starts_with_ss
     end interface
 
+    interface add_hanging_indentation
+        module procedure add_hanging_indentation_c
+        module procedure add_hanging_indentation_s
+    end interface
+
     interface cover_empty_decimal
         module procedure cover_empty_decimal_c
         module procedure cover_empty_decimal_s
@@ -49,9 +64,9 @@ module strff
         module procedure first_character_s
     end interface
 
-    interface hanging_indent
-        module procedure hanging_indent_c
-        module procedure hanging_indent_s
+    interface format_hanging_indented
+        module procedure format_hanging_indented_c
+        module procedure format_hanging_indented_s
     end interface
 
     interface includes
@@ -122,6 +137,31 @@ module strff
 
     character(len=*), parameter :: NEWLINE = NEW_LINE('A')
 contains
+    elemental function add_hanging_indentation_c(string, spaces) result(indented)
+        character(len=*), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(varying_string) :: indented
+
+        indented = add_hanging_indentation(var_str(string), spaces)
+    end function
+
+    elemental function add_hanging_indentation_s(string, spaces) result(indented)
+        type(varying_string), intent(in) :: string
+        integer, intent(in) :: spaces
+        type(varying_string) :: indented
+
+        indented = replace( &
+                replace( &
+                        string // NEWLINE, &
+                        NEWLINE, &
+                        NEWLINE // repeat(" ", spaces), &
+                        every = .true.), &
+                repeat(" ", spaces) // NEWLINE, &
+                NEWLINE, &
+                every = .true.)
+        indented = extract(indented, 1, len(indented) - (1 + spaces))
+    end function
+
     elemental function cover_empty_decimal_c(number) result(fixed)
         character(len=*), intent(in) :: number
         type(varying_string) :: fixed
@@ -156,20 +196,33 @@ contains
         char_ = first_character(char(string))
     end function
 
-    elemental function hanging_indent_c(string, spaces) result(indented)
+    elemental function format_hanging_indented_c(string, spaces) result(indented)
         character(len=*), intent(in) :: string
         integer, intent(in) :: spaces
         type(varying_string) :: indented
 
-        indented = hanging_indent(var_str(string), spaces)
+        indented = format_hanging_indented(var_str(string), spaces)
     end function
 
-    elemental function hanging_indent_s(string, spaces) result(indented)
+    elemental function format_hanging_indented_s(string, spaces) result(indented)
         type(varying_string), intent(in) :: string
         integer, intent(in) :: spaces
         type(varying_string) :: indented
 
-        indented = join(split_at(string, NEWLINE), NEWLINE // repeat(" ", spaces))
+        logical, allocatable :: blank_lines(:)
+        integer :: i
+        type(varying_string), allocatable :: lines(:)
+
+        lines = split_at(string, NEWLINE)
+        blank_lines = verify(lines, " ") == 0
+        where (blank_lines) lines = ""
+        if (.not.blank_lines(1)) lines(1) = extract(lines(1), verify(lines(1), " "))
+        do concurrent (i = 2:size(lines), .not.blank_lines(i))
+            lines(i) = &
+                    merge(var_str(repeat(" ", spaces)), var_str(""), .not.blank_lines(i-1)) &
+                    // extract(lines(i), verify(lines(i), " "))
+        end do
+        indented = join(lines, NEWLINE)
     end function
 
     elemental function includes_cc(within, search_for)
@@ -217,7 +270,7 @@ contains
         integer, intent(in) :: spaces
         type(varying_string) :: indented
 
-        indented = repeat(" ", spaces) // hanging_indent(string, spaces)
+        indented = repeat(" ", spaces) // add_hanging_indentation(string, spaces)
     end function
 
     pure function join_c(strings, separator) result(string)
@@ -228,7 +281,7 @@ contains
         string = join(strings, var_str(separator))
     end function
 
-    pure recursive function join_s(strings, separator) result(string)
+    pure function join_s(strings, separator) result(string)
         type(varying_string), intent(in) :: strings(:)
         type(varying_string), intent(in) :: separator
         type(varying_string) :: string
@@ -241,10 +294,28 @@ contains
         else if (num_strings == 0) then
             string = ""
         else
-            string = &
-                    strings(1) &
-                    // separator &
-                    // join(strings(2:), separator)
+            block
+                integer :: separator_length
+                integer, dimension(num_strings) :: starts, ends
+                integer :: i
+                character(len=:), allocatable :: whole_string
+
+                separator_length = len(separator)
+                starts(1) = 1
+                ends(1) = len(strings(1))
+                do i = 2, num_strings
+                    starts(i) = ends(i-1) + separator_length + 1
+                    ends(i) = starts(i) + len(strings(i)) - 1
+                end do
+                allocate(character(len=ends(num_strings)) :: whole_string)
+                do concurrent (i = 1:num_strings)
+                    whole_string(starts(i):ends(i)) = strings(i)
+                end do
+                do concurrent (i = 2:num_strings)
+                    whole_string(ends(i-1)+1:starts(i)-1) = separator
+                end do
+                string = whole_string
+            end block
         end if
     end function
 
@@ -342,60 +413,44 @@ contains
         lines = read_file_lines(char(filename))
     end function
 
-    pure recursive function split_at_cc( &
+    pure function split_at_cc( &
             string, split_characters) result(strings)
         character(len=*), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(varying_string), allocatable :: strings(:)
 
-        if (len(split_characters) > 0) then
-            if (len(string) > 0) then
-                if (split_characters.includes.first_character(string)) then
-                    allocate(strings, source = split_at( &
-                            without_first_character(string), &
-                            split_characters))
-                else if (split_characters.includes.last_character(string)) then
-                    allocate(strings, source = split_at( &
-                            without_last_character(string), &
-                            split_characters))
-                else
-                    allocate(strings, source = &
-                        do_split(string, split_characters))
-                end if
+        integer :: i
+        integer :: num_substrings
+        integer :: next_sep, prev_sep
+        integer :: string_length
+
+        string_length = len(string)
+        num_substrings = count([(split_characters.includes.string(i:i), i = 1, string_length)]) + 1
+        if (len(split_characters) > 0 .and. num_substrings > 1 .and. string_length > 0) then
+            allocate(strings(num_substrings))
+            prev_sep = scan(string, split_characters)
+            if (prev_sep > 1) then
+                strings(1) = string(1:prev_sep-1)
             else
-                allocate(strings(0))
+                strings(1) = ""
+            end if
+            do i = 2, num_substrings-1
+                next_sep = scan(string(prev_sep+1:string_length), split_characters) + prev_sep
+                if (next_sep - prev_sep > 1) then
+                    strings(i) = string(prev_sep+1:next_sep-1)
+                else
+                    strings(i) = ""
+                end if
+                prev_sep = next_sep
+            end do
+            if (prev_sep < string_length) then
+                strings(num_substrings) = string(prev_sep+1:string_length)
+            else
+                strings(num_substrings) = ""
             end if
         else
-            allocate(strings(1))
-            strings(1) = string
+            allocate(strings, source = [var_str(string)])
         end if
-    contains
-        pure recursive function do_split(string_, split_characters_) result(strings_)
-            character(len=*), intent(in) :: string_
-            character(len=*), intent(in) :: split_characters_
-            type(varying_string), allocatable :: strings_(:)
-
-            integer :: i
-            type(varying_string), allocatable :: rest(:)
-            integer :: string_length_
-            type(varying_string) :: this_string
-
-            string_length_ = len(string_)
-            do i = 2, string_length_
-                if (split_characters_.includes.string_(i:i)) exit
-            end do
-            if (i < string_length_) then
-                this_string = string_(1:i - 1)
-                allocate(rest, source = &
-                        split_at(string_(i + 1:), split_characters_))
-                allocate(strings_(size(rest) + 1))
-                strings_(1) = this_string
-                strings_(2:) = rest(:)
-            else
-                allocate(strings_(1))
-                strings_(1) = string_
-            end if
-        end function
     end function
 
     pure function split_at_cs(string, split_characters) result(strings)
@@ -406,7 +461,7 @@ contains
         allocate(strings, source = split_at(string, char(split_characters)))
     end function
 
-    pure recursive function split_at_sc(string, split_characters) result(strings)
+    pure function split_at_sc(string, split_characters) result(strings)
         type(varying_string), intent(in) :: string
         character(len=*), intent(in) :: split_characters
         type(varying_string), allocatable :: strings(:)
