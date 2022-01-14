@@ -22,7 +22,6 @@ module strff
             cover_empty_decimal, &
             first_character, &
             format_hanging_indented, &
-            hanging_indent, &
             includes, &
             indent, &
             join, &
@@ -68,11 +67,6 @@ module strff
     interface format_hanging_indented
         module procedure format_hanging_indented_c
         module procedure format_hanging_indented_s
-    end interface
-
-    interface hanging_indent
-        module procedure hanging_indent_c
-        module procedure hanging_indent_s
     end interface
 
     interface includes
@@ -229,22 +223,6 @@ contains
                     // extract(lines(i), verify(lines(i), " "))
         end do
         indented = join(lines, NEWLINE)
-    end function
-
-    elemental function hanging_indent_c(string, spaces) result(indented)
-        character(len=*), intent(in) :: string
-        integer, intent(in) :: spaces
-        type(varying_string) :: indented
-
-        indented = hanging_indent(var_str(string), spaces)
-    end function
-
-    elemental function hanging_indent_s(string, spaces) result(indented)
-        type(varying_string), intent(in) :: string
-        integer, intent(in) :: spaces
-        type(varying_string) :: indented
-
-        indented = join(split_at(string, NEWLINE), NEWLINE // repeat(" ", spaces))
     end function
 
     elemental function includes_cc(within, search_for)
