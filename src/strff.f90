@@ -309,11 +309,15 @@ contains
                 end do
                 allocate(character(len=ends(num_strings)) :: whole_string)
                 do concurrent (i = 1:num_strings)
-                    whole_string(starts(i):ends(i)) = strings(i)
+                    if (len(strings(i)) > 0) then
+                        whole_string(starts(i):ends(i)) = strings(i)
+                    end if
                 end do
-                do concurrent (i = 2:num_strings)
-                    whole_string(ends(i-1)+1:starts(i)-1) = separator
-                end do
+                if (separator_length > 0) then
+                    do concurrent (i = 2:num_strings)
+                        whole_string(ends(i-1)+1:starts(i)-1) = separator
+                    end do
+                end if
                 string = whole_string
             end block
         end if
