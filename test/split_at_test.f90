@@ -1,7 +1,7 @@
 module split_at_test
     use iso_varying_string, only: varying_string
     use strff, only: split_at
-    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+    use veggies, only: test_item_t, result_t, assert_equals, describe, it
 
     implicit none
     private

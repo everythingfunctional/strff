@@ -1,6 +1,6 @@
 module indent_test
     use strff, only: indent, NEWLINE
-    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+    use veggies, only: test_item_t, result_t, assert_equals, describe, it
 
     implicit none
     private

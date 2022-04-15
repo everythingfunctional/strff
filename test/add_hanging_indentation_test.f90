@@ -1,7 +1,7 @@
 module add_hanging_indentation_test
     use iso_varying_string, only: varying_string, len
     use strff, only: add_hanging_indentation, NEWLINE
-    use vegetables, only: result_t, test_item_t, assert_equals, describe, it
+    use veggies, only: result_t, test_item_t, assert_equals, describe, it
 
     implicit none
     private

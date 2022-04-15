@@ -1,7 +1,7 @@
 module read_file_test
     use iso_varying_string, only: put
     use strff, only: read_file, NEWLINE
-    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+    use veggies, only: test_item_t, result_t, assert_equals, describe, it
 
     implicit none
     private
@@ -44,7 +44,7 @@ contains
     ! function check_speed() result(result_)
     !     use iso_varying_string, only: varying_string, put
     !     use text_m, only: TEST_TEXT
-    !     use vegetables, only: result_t, assert_faster_than
+    !     use veggies, only: result_t, assert_faster_than
     !
     !     type(result_t) :: result_
     !

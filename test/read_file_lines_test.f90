@@ -3,7 +3,7 @@ module read_file_lines_test
     use iso_varying_string, only: varying_string, operator(//), get, put
     use strff, only: read_file_lines, split_at, NEWLINE
     use text_m, only: TEST_TEXT
-    use vegetables, only: &
+    use veggies, only: &
             test_item_t, &
             result_t, &
             assert_equals, &

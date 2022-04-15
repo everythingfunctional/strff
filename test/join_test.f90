@@ -1,7 +1,7 @@
 module join_test
     use iso_varying_string, only: var_str
     use strff, only: join
-    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+    use veggies, only: test_item_t, result_t, assert_equals, describe, it
 
     implicit none
     private

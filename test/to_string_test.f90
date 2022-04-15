@@ -1,6 +1,6 @@
 module to_string_test
     use strff, only: to_string
-    use vegetables, only: test_item_t, result_t, assert_equals, describe, it
+    use veggies, only: test_item_t, result_t, assert_equals, describe, it
 
     implicit none
     private

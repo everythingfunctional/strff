@@ -1,6 +1,6 @@
 module starts_with_test
     use strff, only: operator(.startswith.)
-    use vegetables, only: &
+    use veggies, only: &
             test_item_t, result_t, assert_not, assert_that, describe, it
 
     implicit none

@@ -1,7 +1,7 @@
 module format_hanging_indented_test
     use iso_varying_string, only: varying_string, len
     use strff, only: format_hanging_indented, NEWLINE
-    use vegetables, only: result_t, test_item_t, assert_equals, describe, it
+    use veggies, only: result_t, test_item_t, assert_equals, describe, it
 
     implicit none
     private
