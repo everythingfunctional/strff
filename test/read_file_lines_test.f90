@@ -2,7 +2,6 @@ module read_file_lines_test
     use iso_fortran_env, only: IOSTAT_END
     use iso_varying_string, only: varying_string, operator(//), get, put
     use strff, only: read_file_lines, split_at, NEWLINE
-    use text_m, only: TEST_TEXT
     use veggies, only: &
             test_item_t, &
             result_t, &
@@ -60,25 +59,18 @@ contains
     function check_speed() result(result_)
         type(result_t) :: result_
 
-        character(len=*), parameter :: TEMP_FILE_NAME = "read_file_lines_speed_tmp.txt"
+        character(len=*), parameter :: FILE_NAME = "test/read_speed_test.txt"
         type(varying_string), allocatable :: lines(:)
         integer :: file_unit
 
-        open(newunit = file_unit, file = TEMP_FILE_NAME, action = "WRITE", status = "REPLACE")
-        call put(file_unit, TEST_TEXT)
-        close(file_unit)
-
         result_ = assert_faster_than(do_alt_read, do_fast_read, 50)
-
-        open(newunit = file_unit, file = TEMP_FILE_NAME)
-        close(file_unit, status = "DELETE")
     contains
         subroutine do_fast_read
-            lines = read_file_lines(TEMP_FILE_NAME)
+            lines = read_file_lines(FILE_NAME)
         end subroutine
 
         subroutine do_alt_read
-            lines = alt_read_file_lines(TEMP_FILE_NAME)
+            lines = alt_read_file_lines(FILE_NAME)
         end subroutine
     end function
 
