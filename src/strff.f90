@@ -213,8 +213,8 @@ contains
         integer :: i
         type(varying_string), allocatable :: lines(:)
 
-        lines = split_at(string, NEWLINE)
-        blank_lines = verify(lines, " ") == 0
+        allocate(lines, source = split_at(string, NEWLINE))
+        allocate(blank_lines, source = verify(lines, " ") == 0)
         where (blank_lines) lines = ""
         if (.not.blank_lines(1)) lines(1) = extract(lines(1), verify(lines(1), " "))
         do concurrent (i = 2:size(lines), .not.blank_lines(i))

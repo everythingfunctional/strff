@@ -61,7 +61,6 @@ contains
 
         character(len=*), parameter :: FILE_NAME = "test/read_speed_test.txt"
         type(varying_string), allocatable :: lines(:)
-        integer :: file_unit
 
         result_ = assert_faster_than(do_alt_read, do_fast_read, 50)
     contains
