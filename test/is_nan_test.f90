@@ -17,8 +17,8 @@ contains
             [ it("is false for normal numbers", check_normal) &
             , it("is false for huge", check_huge) &
             , it("is false for tiny", check_tiny) &
-            , it("is false for infinity", check_inf) &
-            , it("is false for -infinity", check_neg_inf) &
+            , it("is false for +inf", check_pos_inf) &
+            , it("is false for -inf", check_neg_inf) &
             , it("is false for numbers larger than huge", check_big) &
             , it("is false for numbers smaller than tiny", check_small) &
             , it("is true for nan", check_nan) &
@@ -43,7 +43,7 @@ contains
         result_ = assert_not(is_nan(tiny(1.0)))
     end function
 
-    function check_inf() result(result_)
+    function check_pos_inf() result(result_)
         type(result_t) :: result_
 
         result_ = assert_not(is_nan(ieee_value(1.0, ieee_positive_inf)))

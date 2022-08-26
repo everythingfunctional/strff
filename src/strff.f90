@@ -1,4 +1,5 @@
 module strff
+    use ieee_arithmetic, only: ieee_support_datatype, ieee_is_finite
     use iso_fortran_env, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, IOSTAT_END
     use iso_varying_string, only: &
@@ -24,6 +25,7 @@ module strff
             format_hanging_indented, &
             includes, &
             indent, &
+            is_infinity, &
             is_nan, &
             join, &
             last_character, &
@@ -80,6 +82,11 @@ module strff
     interface indent
         module procedure indent_c
         module procedure indent_s
+    end interface
+
+    interface is_infinity
+        module procedure is_infinity_real32
+        module procedure is_infinity_real64
     end interface
 
     interface is_nan
@@ -752,7 +759,47 @@ contains
         trimmed = without_last_character(char(string))
     end function
 
-    pure function is_nan_real32(val) result(is_nan)
+    elemental function is_infinity_real32(val) result(is_infinity)
+        real(REAL32), intent(in) :: val
+        logical :: is_infinity
+
+
+        if (is_nan(val)) then
+            is_infinity = .false.
+            return
+        end if
+
+        if (ieee_support_datatype(val)) then
+            is_infinity = .not. ieee_is_finite(val)
+        else
+            ! This isn't quite right. It is conceivable for a processor
+            ! to have numbers greater than huge that aren't considered infinity,
+            ! but for now I don't know of a reliable way to test for that
+            is_infinity = val < -huge(val) .or. val > huge(val)
+        end if
+    end function
+
+    elemental function is_infinity_real64(val) result(is_infinity)
+        real(REAL64), intent(in) :: val
+        logical :: is_infinity
+
+
+        if (is_nan(val)) then
+            is_infinity = .false.
+            return
+        end if
+
+        if (ieee_support_datatype(val)) then
+            is_infinity = .not. ieee_is_finite(val)
+        else
+            ! This isn't quite right. It is conceivable for a processor
+            ! to have numbers greater than huge that aren't considered infinity,
+            ! but for now I don't know of a reliable way to test for that
+            is_infinity = val < -huge(val) .or. val > huge(val)
+        end if
+    end function
+
+    elemental function is_nan_real32(val) result(is_nan)
         real(REAL32), intent(in) :: val
         logical :: is_nan
 
@@ -761,7 +808,7 @@ contains
         is_nan = .not.(val >= TEST .or. val <= TEST)
     end function
 
-    pure function is_nan_real64(val) result(is_nan)
+    elemental function is_nan_real64(val) result(is_nan)
         real(REAL64), intent(in) :: val
         logical :: is_nan
 

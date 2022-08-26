@@ -14,6 +14,9 @@ contains
         use indent_test, only: &
                 indent_indent => &
                     test_indent
+        use is_infinity_test, only: &
+                is_infinity_is_infinity => &
+                    test_is_infinity
         use is_nan_test, only: &
                 is_nan_is_nan => &
                     test_is_nan
@@ -44,19 +47,20 @@ contains
         logical :: passed
 
         type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(11)
+        type(test_item_t) :: individual_tests(12)
 
         individual_tests(1) = add_hanging_indentation_add_hanging_indentation()
         individual_tests(2) = format_hanging_indented_format_hanging_indented()
         individual_tests(3) = indent_indent()
-        individual_tests(4) = is_nan_is_nan()
-        individual_tests(5) = join_join()
-        individual_tests(6) = read_file_lines_read_file_lines()
-        individual_tests(7) = read_file_read_file()
-        individual_tests(8) = split_at_split_at()
-        individual_tests(9) = starts_with_starts_with()
-        individual_tests(10) = to_string_to_string_for_doubles()
-        individual_tests(11) = to_string_to_string_for_integers()
+        individual_tests(4) = is_infinity_is_infinity()
+        individual_tests(5) = is_nan_is_nan()
+        individual_tests(6) = join_join()
+        individual_tests(7) = read_file_lines_read_file_lines()
+        individual_tests(8) = read_file_read_file()
+        individual_tests(9) = split_at_split_at()
+        individual_tests(10) = starts_with_starts_with()
+        individual_tests(11) = to_string_to_string_for_doubles()
+        individual_tests(12) = to_string_to_string_for_integers()
         tests = test_that(individual_tests)
 
 
