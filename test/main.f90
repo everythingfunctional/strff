@@ -20,6 +20,9 @@ contains
         use is_nan_test, only: &
                 is_nan_is_nan => &
                     test_is_nan
+        use is_negative_test, only: &
+                is_negative_is_negative => &
+                    test_is_negative
         use is_zero_test, only: &
                 is_zero_is_zero => &
                     test_is_zero
@@ -50,21 +53,22 @@ contains
         logical :: passed
 
         type(test_item_t) :: tests
-        type(test_item_t) :: individual_tests(13)
+        type(test_item_t) :: individual_tests(14)
 
         individual_tests(1) = add_hanging_indentation_add_hanging_indentation()
         individual_tests(2) = format_hanging_indented_format_hanging_indented()
         individual_tests(3) = indent_indent()
         individual_tests(4) = is_infinity_is_infinity()
         individual_tests(5) = is_nan_is_nan()
-        individual_tests(6) = is_zero_is_zero()
-        individual_tests(7) = join_join()
-        individual_tests(8) = read_file_lines_read_file_lines()
-        individual_tests(9) = read_file_read_file()
-        individual_tests(10) = split_at_split_at()
-        individual_tests(11) = starts_with_starts_with()
-        individual_tests(12) = to_string_to_string_for_doubles()
-        individual_tests(13) = to_string_to_string_for_integers()
+        individual_tests(6) = is_negative_is_negative()
+        individual_tests(7) = is_zero_is_zero()
+        individual_tests(8) = join_join()
+        individual_tests(9) = read_file_lines_read_file_lines()
+        individual_tests(10) = read_file_read_file()
+        individual_tests(11) = split_at_split_at()
+        individual_tests(12) = starts_with_starts_with()
+        individual_tests(13) = to_string_to_string_for_doubles()
+        individual_tests(14) = to_string_to_string_for_integers()
         tests = test_that(individual_tests)
 
 

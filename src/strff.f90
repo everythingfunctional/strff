@@ -26,6 +26,7 @@ module strff
             indent, &
             is_infinity, &
             is_nan, &
+            is_negative, &
             is_zero, &
             join, &
             last_character, &
@@ -94,8 +95,14 @@ module strff
         module procedure is_nan_real64
     end interface
 
+    interface is_negative
+        module procedure is_negative_real32
+        module procedure is_negative_real64
+    end interface
+
     interface is_zero
         module procedure is_zero_real32
+        module procedure is_zero_real64
     end interface
 
     interface join
@@ -807,8 +814,41 @@ contains
         is_nan = .not.(val >= 0 .or. val <= 0)
     end function
 
+    elemental function is_negative_real32(val) result(is_negative)
+        real(REAL32), intent(in) :: val
+        logical :: is_negative
+
+        if (is_nan(val)) then
+            is_negative = .false.
+        else
+            is_negative = sign(1.0_real32, val) < 0
+        end if
+    end function
+
+    elemental function is_negative_real64(val) result(is_negative)
+        real(REAL64), intent(in) :: val
+        logical :: is_negative
+
+        if (is_nan(val)) then
+            is_negative = .false.
+        else
+            is_negative = sign(1.0_real64, val) < 0
+        end if
+    end function
+
     elemental function is_zero_real32(val) result(is_zero)
         real(REAL32), intent(in) :: val
+        logical :: is_zero
+
+        if (is_nan(val)) then
+            is_zero = .false.
+        else
+            is_zero = .not. (val > 0 .or. val < 0)
+        end if
+    end function
+
+    elemental function is_zero_real64(val) result(is_zero)
+        real(REAL64), intent(in) :: val
         logical :: is_zero
 
         if (is_nan(val)) then
