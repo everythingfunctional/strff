@@ -24,6 +24,10 @@ module strff
             format_hanging_indented, &
             includes, &
             indent, &
+            is_infinity, &
+            is_nan, &
+            is_negative, &
+            is_zero, &
             join, &
             last_character, &
             read_file, &
@@ -79,6 +83,26 @@ module strff
     interface indent
         module procedure indent_c
         module procedure indent_s
+    end interface
+
+    interface is_infinity
+        module procedure is_infinity_real32
+        module procedure is_infinity_real64
+    end interface
+
+    interface is_nan
+        module procedure is_nan_real32
+        module procedure is_nan_real64
+    end interface
+
+    interface is_negative
+        module procedure is_negative_real32
+        module procedure is_negative_real64
+    end interface
+
+    interface is_zero
+        module procedure is_zero_real32
+        module procedure is_zero_real64
     end interface
 
     interface join
@@ -587,60 +611,67 @@ contains
         integer, intent(in) :: significant_digits
         type(varying_string) :: string_
 
-        integer, parameter :: C_LEN = 18
-        real(REAL32), parameter :: MACHINE_TINY = tiny(real(0.0, kind=REAL32))
-        real(REAL32) :: abs_num
-        character(len=C_LEN) :: exponent_part
-        character(len=C_LEN) :: floating_part
-        character(len=7) :: format_string
         type(varying_string) :: intermediate
-        type(varying_string) :: intermediate_basic
-        type(varying_string) :: intermediate_scientific
-        integer :: scale_
 
-        abs_num = abs(number)
-        if (abs_num <= MACHINE_TINY) then
-            string_ = "0.0"
-            return
-        end if
-        scale_ = floor(log10(abs_num))
-        if (scale_ <= -2) then
-            write(format_string, '(A,I0,A)') &
-                    "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) &
-                    abs_num * 1.0D1**(-scale_)
-            write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate = &
-                    cover_empty_decimal( &
-                            remove_trailing_zeros(trim(floating_part))) &
-                    // trim(exponent_part)
+        if (is_nan(number)) then
+            intermediate = "NaN"
+        else if (is_infinity(number)) then
+            intermediate = "Inf"
+        else if (is_zero(number)) then
+            intermediate = "0.0"
         else
-            write(format_string, '(A,I0,A)') &
-                    "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) abs_num / 1.0D1**scale_
-            write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate_scientific = &
-                    cover_empty_decimal( &
-                            remove_trailing_zeros(trim(floating_part))) &
-                    // trim(exponent_part)
+            block
+                integer, parameter :: C_LEN = 18
+                real(REAL32) :: abs_num
+                character(len=C_LEN) :: exponent_part
+                character(len=C_LEN) :: floating_part
+                character(len=7) :: format_string
+                type(varying_string) :: intermediate_basic
+                type(varying_string) :: intermediate_scientific
+                integer :: scale_
 
-            if (scale_ < significant_digits) then
-                write(format_string, '(A,I0,A)') &
-                        "(f0.", significant_digits-scale_-1, ")"
-                write(floating_part, format_string) abs_num
-                intermediate_basic = cover_empty_decimal( &
-                        remove_trailing_zeros(trim(floating_part)))
-
-                if (len(intermediate_scientific) < len(intermediate_basic)) then
-                    intermediate = intermediate_scientific
+                abs_num = abs(number)
+                scale_ = floor(log10(abs_num))
+                if (scale_ <= -2) then
+                    write(format_string, '(A,I0,A)') &
+                            "(f0.", significant_digits-1, ")"
+                    write(floating_part, format_string) &
+                            abs_num * 10.0_REAL32**(-scale_)
+                    write(exponent_part, '(A,I0)') 'e', scale_
+                    intermediate = &
+                            cover_empty_decimal( &
+                                    remove_trailing_zeros(trim(floating_part))) &
+                            // trim(exponent_part)
                 else
-                    intermediate = intermediate_basic
+                    write(format_string, '(A,I0,A)') &
+                            "(f0.", significant_digits-1, ")"
+                    write(floating_part, format_string) abs_num / 10.0_REAL32**scale_
+                    write(exponent_part, '(A,I0)') 'e', scale_
+                    intermediate_scientific = &
+                            cover_empty_decimal( &
+                                    remove_trailing_zeros(trim(floating_part))) &
+                            // trim(exponent_part)
+
+                    if (scale_ < significant_digits) then
+                        write(format_string, '(A,I0,A)') &
+                                "(f0.", significant_digits-scale_-1, ")"
+                        write(floating_part, format_string) abs_num
+                        intermediate_basic = cover_empty_decimal( &
+                                remove_trailing_zeros(trim(floating_part)))
+
+                        if (len(intermediate_scientific) < len(intermediate_basic)) then
+                            intermediate = intermediate_scientific
+                        else
+                            intermediate = intermediate_basic
+                        end if
+                    else
+                        intermediate = intermediate_scientific
+                    end if
                 end if
-            else
-                intermediate = intermediate_scientific
-            end if
+            end block
         end if
-        if (number < 0.0D0) then
+
+        if (is_negative(number)) then
             string_ = "-" // intermediate
         else
             string_ = intermediate
@@ -653,60 +684,66 @@ contains
         integer, intent(in) :: significant_digits
         type(varying_string) :: string_
 
-        integer, parameter :: C_LEN = 34
-        real(REAL64), parameter :: MACHINE_TINY = tiny(real(0.0, kind=REAL64))
-        real(REAL64) :: abs_num
-        character(len=C_LEN) :: exponent_part
-        character(len=C_LEN) :: floating_part
-        character(len=7) :: format_string
         type(varying_string) :: intermediate
-        type(varying_string) :: intermediate_basic
-        type(varying_string) :: intermediate_scientific
-        integer :: scale_
 
-        abs_num = abs(number)
-        if (abs_num <= MACHINE_TINY) then
-            string_ = "0.0"
-            return
-        end if
-        scale_ = floor(log10(abs_num))
-        if (scale_ <= -2) then
-            write(format_string, '(A,I0,A)') &
-                    "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) &
-                    abs_num * 1.0D1**(-scale_)
-            write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate = &
-                    cover_empty_decimal( &
-                            remove_trailing_zeros(trim(floating_part))) &
-                    // trim(exponent_part)
+        if (is_nan(number)) then
+            intermediate = "NaN"
+        else if (is_infinity(number)) then
+            intermediate = "Inf"
+        else if (is_zero(number)) then
+            intermediate = "0.0"
         else
-            write(format_string, '(A,I0,A)') &
-                    "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) abs_num / 1.0D1**scale_
-            write(exponent_part, '(A,I0)') 'e', scale_
-            intermediate_scientific = &
-                    cover_empty_decimal( &
-                            remove_trailing_zeros(trim(floating_part))) &
-                    // trim(exponent_part)
+            block
+                integer, parameter :: C_LEN = 34
+                real(REAL64) :: abs_num
+                character(len=C_LEN) :: exponent_part
+                character(len=C_LEN) :: floating_part
+                character(len=7) :: format_string
+                type(varying_string) :: intermediate_basic
+                type(varying_string) :: intermediate_scientific
+                integer :: scale_
 
-            if (scale_ < significant_digits) then
-                write(format_string, '(A,I0,A)') &
-                        "(f0.", significant_digits-scale_-1, ")"
-                write(floating_part, format_string) abs_num
-                intermediate_basic = cover_empty_decimal( &
-                        remove_trailing_zeros(trim(floating_part)))
-
-                if (len(intermediate_scientific) < len(intermediate_basic)) then
-                    intermediate = intermediate_scientific
+                abs_num = abs(number)
+                scale_ = floor(log10(abs_num))
+                if (scale_ <= -2) then
+                    write(format_string, '(A,I0,A)') &
+                            "(f0.", significant_digits-1, ")"
+                    write(floating_part, format_string) &
+                            abs_num * 10.0_REAL64**(-scale_)
+                    write(exponent_part, '(A,I0)') 'e', scale_
+                    intermediate = &
+                            cover_empty_decimal( &
+                                    remove_trailing_zeros(trim(floating_part))) &
+                            // trim(exponent_part)
                 else
-                    intermediate = intermediate_basic
+                    write(format_string, '(A,I0,A)') &
+                            "(f0.", significant_digits-1, ")"
+                    write(floating_part, format_string) abs_num / 10.0_REAL64**scale_
+                    write(exponent_part, '(A,I0)') 'e', scale_
+                    intermediate_scientific = &
+                            cover_empty_decimal( &
+                                    remove_trailing_zeros(trim(floating_part))) &
+                            // trim(exponent_part)
+
+                    if (scale_ < significant_digits) then
+                        write(format_string, '(A,I0,A)') &
+                                "(f0.", significant_digits-scale_-1, ")"
+                        write(floating_part, format_string) abs_num
+                        intermediate_basic = cover_empty_decimal( &
+                                remove_trailing_zeros(trim(floating_part)))
+
+                        if (len(intermediate_scientific) < len(intermediate_basic)) then
+                            intermediate = intermediate_scientific
+                        else
+                            intermediate = intermediate_basic
+                        end if
+                    else
+                        intermediate = intermediate_scientific
+                    end if
                 end if
-            else
-                intermediate = intermediate_scientific
-            end if
+            end block
         end if
-        if (number < 0.0D0) then
+        if (is_negative(number)) then
             string_ = "-" // intermediate
         else
             string_ = intermediate
@@ -744,5 +781,93 @@ contains
         type(varying_string) :: trimmed
 
         trimmed = without_last_character(char(string))
+    end function
+
+    elemental function is_infinity_real32(val) result(is_infinity)
+        real(REAL32), intent(in) :: val
+        logical :: is_infinity
+
+
+        if (is_nan(val)) then
+            is_infinity = .false.
+        else
+            ! This isn't quite right. It is conceivable for a processor
+            ! to have numbers greater than huge that aren't considered infinity,
+            ! but for now I don't know of a reliable way to test for that
+            is_infinity = val < -huge(val) .or. val > huge(val)
+        end if
+    end function
+
+    elemental function is_infinity_real64(val) result(is_infinity)
+        real(REAL64), intent(in) :: val
+        logical :: is_infinity
+
+
+        if (is_nan(val)) then
+            is_infinity = .false.
+        else
+            ! This isn't quite right. It is conceivable for a processor
+            ! to have numbers greater than huge that aren't considered infinity,
+            ! but for now I don't know of a reliable way to test for that
+            is_infinity = val < -huge(val) .or. val > huge(val)
+        end if
+    end function
+
+    elemental function is_nan_real32(val) result(is_nan)
+        real(REAL32), intent(in) :: val
+        logical :: is_nan
+
+        is_nan = .not.(val >= 0 .or. val <= 0)
+    end function
+
+    elemental function is_nan_real64(val) result(is_nan)
+        real(REAL64), intent(in) :: val
+        logical :: is_nan
+
+        is_nan = .not.(val >= 0 .or. val <= 0)
+    end function
+
+    elemental function is_negative_real32(val) result(is_negative)
+        real(REAL32), intent(in) :: val
+        logical :: is_negative
+
+        if (is_nan(val)) then
+            is_negative = .false.
+        else
+            is_negative = sign(1.0_real32, val) < 0
+        end if
+    end function
+
+    elemental function is_negative_real64(val) result(is_negative)
+        real(REAL64), intent(in) :: val
+        logical :: is_negative
+
+        if (is_nan(val)) then
+            is_negative = .false.
+        else
+            is_negative = sign(1.0_real64, val) < 0
+        end if
+    end function
+
+    elemental function is_zero_real32(val) result(is_zero)
+        real(REAL32), intent(in) :: val
+        logical :: is_zero
+
+        if (is_nan(val)) then
+            is_zero = .false.
+        else
+            is_zero = .not. (val > 0 .or. val < 0)
+        end if
+    end function
+
+    elemental function is_zero_real64(val) result(is_zero)
+        real(REAL64), intent(in) :: val
+        logical :: is_zero
+
+        if (is_nan(val)) then
+            is_zero = .false.
+        else
+            is_zero = .not. (val > 0 .or. val < 0)
+        end if
     end function
 end module
