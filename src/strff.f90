@@ -24,6 +24,7 @@ module strff
             format_hanging_indented, &
             includes, &
             indent, &
+            is_nan, &
             join, &
             last_character, &
             read_file, &
@@ -79,6 +80,11 @@ module strff
     interface indent
         module procedure indent_c
         module procedure indent_s
+    end interface
+
+    interface is_nan
+        module procedure is_nan_real32
+        module procedure is_nan_real64
     end interface
 
     interface join
@@ -588,7 +594,7 @@ contains
         type(varying_string) :: string_
 
         integer, parameter :: C_LEN = 18
-        real(REAL32), parameter :: MACHINE_TINY = tiny(real(0.0, kind=REAL32))
+        real(REAL32), parameter :: MACHINE_TINY = tiny(0.0_REAL32)
         real(REAL32) :: abs_num
         character(len=C_LEN) :: exponent_part
         character(len=C_LEN) :: floating_part
@@ -608,7 +614,7 @@ contains
             write(format_string, '(A,I0,A)') &
                     "(f0.", significant_digits-1, ")"
             write(floating_part, format_string) &
-                    abs_num * 1.0D1**(-scale_)
+                    abs_num * 10.0_REAL32**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate = &
                     cover_empty_decimal( &
@@ -617,7 +623,7 @@ contains
         else
             write(format_string, '(A,I0,A)') &
                     "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) abs_num / 1.0D1**scale_
+            write(floating_part, format_string) abs_num / 10.0_REAL32**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate_scientific = &
                     cover_empty_decimal( &
@@ -640,7 +646,7 @@ contains
                 intermediate = intermediate_scientific
             end if
         end if
-        if (number < 0.0D0) then
+        if (number < 0.0_REAL32) then
             string_ = "-" // intermediate
         else
             string_ = intermediate
@@ -654,7 +660,7 @@ contains
         type(varying_string) :: string_
 
         integer, parameter :: C_LEN = 34
-        real(REAL64), parameter :: MACHINE_TINY = tiny(real(0.0, kind=REAL64))
+        real(REAL64), parameter :: MACHINE_TINY = tiny(0.0_REAL64)
         real(REAL64) :: abs_num
         character(len=C_LEN) :: exponent_part
         character(len=C_LEN) :: floating_part
@@ -674,7 +680,7 @@ contains
             write(format_string, '(A,I0,A)') &
                     "(f0.", significant_digits-1, ")"
             write(floating_part, format_string) &
-                    abs_num * 1.0D1**(-scale_)
+                    abs_num * 10.0_REAL64**(-scale_)
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate = &
                     cover_empty_decimal( &
@@ -683,7 +689,7 @@ contains
         else
             write(format_string, '(A,I0,A)') &
                     "(f0.", significant_digits-1, ")"
-            write(floating_part, format_string) abs_num / 1.0D1**scale_
+            write(floating_part, format_string) abs_num / 10.0_REAL64**scale_
             write(exponent_part, '(A,I0)') 'e', scale_
             intermediate_scientific = &
                     cover_empty_decimal( &
@@ -706,7 +712,7 @@ contains
                 intermediate = intermediate_scientific
             end if
         end if
-        if (number < 0.0D0) then
+        if (number < 0.0_REAL64) then
             string_ = "-" // intermediate
         else
             string_ = intermediate
@@ -744,5 +750,23 @@ contains
         type(varying_string) :: trimmed
 
         trimmed = without_last_character(char(string))
+    end function
+
+    pure function is_nan_real32(val) result(is_nan)
+        real(REAL32), intent(in) :: val
+        logical :: is_nan
+
+        real(REAL32), parameter :: TEST = 0.0_REAL32
+
+        is_nan = .not.(val >= TEST .or. val <= TEST)
+    end function
+
+    pure function is_nan_real64(val) result(is_nan)
+        real(REAL64), intent(in) :: val
+        logical :: is_nan
+
+        real(REAL64), parameter :: TEST = 0.0_REAL64
+
+        is_nan = .not.(val >= TEST .or. val <= TEST)
     end function
 end module
