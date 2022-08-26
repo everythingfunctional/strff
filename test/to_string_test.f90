@@ -17,11 +17,11 @@ contains
                         check_includes_zero_after_decimal) &
                 , it( &
                         "only keeps the specified number of digits", &
-                        check_only_keeps_six_digits) &
+                        check_only_keeps_n_digits) &
                 , it("handles zero correctly", check_handles_zero) &
                 , it( &
-                        "handles extreme numbers correctly", &
-                        check_handles_extreme_numbers) &
+                        "handles large and small numbers correctly", &
+                        check_handles_large_and_small_numbers) &
                 , it( &
                         "can do negative numbers", &
                         check_negative_numbers) &
@@ -48,7 +48,7 @@ contains
                 .and.assert_equals("10.0", to_string(1.0D1))
     end function
 
-    pure function check_only_keeps_six_digits() result(result_)
+    pure function check_only_keeps_n_digits() result(result_)
         type(result_t) :: result_
 
         result_ = &
@@ -70,7 +70,7 @@ contains
                 .and.assert_equals("0.0", to_string(tiny(0.0D0)))
     end function
 
-    pure function check_handles_extreme_numbers() result(result_)
+    pure function check_handles_large_and_small_numbers() result(result_)
         type(result_t) :: result_
 
         result_ = &
