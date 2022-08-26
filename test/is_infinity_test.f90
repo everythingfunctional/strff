@@ -55,6 +55,7 @@ contains
         result_ = assert_that(is_infinity(ieee_value(1.0, ieee_negative_inf)))
     end function
 
+    ! Can't test this, because on most systems anything greater than huge overflows and actually does produce infinity
     ! function check_big() result(result_)
     !     type(result_t) :: result_
 

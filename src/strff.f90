@@ -1,5 +1,4 @@
 module strff
-    use ieee_arithmetic, only: ieee_support_datatype, ieee_is_finite
     use iso_fortran_env, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, IOSTAT_END
     use iso_varying_string, only: &
@@ -27,6 +26,7 @@ module strff
             indent, &
             is_infinity, &
             is_nan, &
+            is_zero, &
             join, &
             last_character, &
             read_file, &
@@ -92,6 +92,10 @@ module strff
     interface is_nan
         module procedure is_nan_real32
         module procedure is_nan_real64
+    end interface
+
+    interface is_zero
+        module procedure is_zero_real32
     end interface
 
     interface join
@@ -766,11 +770,6 @@ contains
 
         if (is_nan(val)) then
             is_infinity = .false.
-            return
-        end if
-
-        if (ieee_support_datatype(val)) then
-            is_infinity = .not. ieee_is_finite(val)
         else
             ! This isn't quite right. It is conceivable for a processor
             ! to have numbers greater than huge that aren't considered infinity,
@@ -786,11 +785,6 @@ contains
 
         if (is_nan(val)) then
             is_infinity = .false.
-            return
-        end if
-
-        if (ieee_support_datatype(val)) then
-            is_infinity = .not. ieee_is_finite(val)
         else
             ! This isn't quite right. It is conceivable for a processor
             ! to have numbers greater than huge that aren't considered infinity,
@@ -803,17 +797,24 @@ contains
         real(REAL32), intent(in) :: val
         logical :: is_nan
 
-        real(REAL32), parameter :: TEST = 0.0_REAL32
-
-        is_nan = .not.(val >= TEST .or. val <= TEST)
+        is_nan = .not.(val >= 0 .or. val <= 0)
     end function
 
     elemental function is_nan_real64(val) result(is_nan)
         real(REAL64), intent(in) :: val
         logical :: is_nan
 
-        real(REAL64), parameter :: TEST = 0.0_REAL64
+        is_nan = .not.(val >= 0 .or. val <= 0)
+    end function
 
-        is_nan = .not.(val >= TEST .or. val <= TEST)
+    elemental function is_zero_real32(val) result(is_zero)
+        real(REAL32), intent(in) :: val
+        logical :: is_zero
+
+        if (is_nan(val)) then
+            is_zero = .false.
+        else
+            is_zero = .not. (val > 0 .or. val < 0)
+        end if
     end function
 end module
