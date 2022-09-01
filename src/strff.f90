@@ -1,4 +1,6 @@
 module strff
+    !! This module defines a library of string functions not available as
+    !! intrinsics, but which are generally available in other languages.
     use iso_fortran_env, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, IOSTAT_END
     use iso_varying_string, only: &
@@ -40,6 +42,8 @@ module strff
             NEWLINE
 
     interface operator(.includes.)
+        !! Does the string on the left-hand side of the operator include
+        !! the string on the right-hand side of the operator as a substring?
         module procedure includes_cc
         module procedure includes_cs
         module procedure includes_sc
@@ -47,6 +51,8 @@ module strff
     end interface
 
     interface operator(.startswith.)
+        !! Does the string on the left-hand side of the operator begin with
+        !! string on the right-hand side?
         module procedure starts_with_cc
         module procedure starts_with_cs
         module procedure starts_with_sc
@@ -54,26 +60,39 @@ module strff
     end interface
 
     interface add_hanging_indentation
+        !! Adds `spaces` number of blanks to the beginning of all but the first
+        !! line of a string, ignoring blank lines.
         module procedure add_hanging_indentation_c
         module procedure add_hanging_indentation_s
     end interface
 
     interface cover_empty_decimal
+        !! * Concatenates '0' to the end of a string if the last character is '.'
+        !! * Concatenates '0' to the front of a string if the first character is '.'
+        !! * Returns the string unmodified otherwise
         module procedure cover_empty_decimal_c
         module procedure cover_empty_decimal_s
     end interface
 
     interface first_character
+        !! Returns only the first character of a string.
+        !!
+        !! **NOTE:** The argument must not have zero length.
         module procedure first_character_c
         module procedure first_character_s
     end interface
 
     interface format_hanging_indented
+        !! Ensures that the first line of each paragraph (where paragraphs are
+        !! separated by blank lines) does not begin with leading blanks, but
+        !! that all subsequent lines of a paragraph begin with `spaces` number
+        !! of blanks
         module procedure format_hanging_indented_c
         module procedure format_hanging_indented_s
     end interface
 
     interface includes
+        !! Does the first argument include the second argument as a substring?
         module procedure includes_cc
         module procedure includes_cs
         module procedure includes_sc
@@ -81,56 +100,76 @@ module strff
     end interface
 
     interface indent
+        !! Add `spaces` number of blanks to the beginning of each line of a string
         module procedure indent_c
         module procedure indent_s
     end interface
 
     interface is_infinity
+        !! Is the given number Inf or -Inf?
         module procedure is_infinity_real32
         module procedure is_infinity_real64
     end interface
 
     interface is_nan
+        !! Is the given number NaN
         module procedure is_nan_real32
         module procedure is_nan_real64
     end interface
 
     interface is_negative
+        !! Is the given number negative?
         module procedure is_negative_real32
         module procedure is_negative_real64
     end interface
 
     interface is_zero
+        !! Is the given number exactly 0.0 or -0.0?
         module procedure is_zero_real32
         module procedure is_zero_real64
     end interface
 
     interface join
+        !! Concatenate the given array of string together, with the given
+        !! separator between each element.
         module procedure join_c
         module procedure join_s
     end interface
 
     interface last_character
+        !! Returns only the last character of a string.
+        !!
+        !! **NOTE:** The argument must not have zero length.
         module procedure last_character_c
         module procedure last_character_s
     end interface
 
     interface read_file
+        !! Read the contents of the given file into a single string.
+        !! Note: `read_file(name) == join(read_file_lines(name), NEWLINE)`
         module procedure read_file_c
         module procedure read_file_s
     end interface
 
     interface read_file_lines
+        !! Read the contents of a file into an array of strings, with each line
+        !! in the file as an element of the array.
+        !! Note: `read_file_lines(name) == split_at(read_file(name), NEWLINE)`
         module procedure read_file_lines_c
         module procedure read_file_lines_s
     end interface
 
     interface remove_trailing_zeros
+        !! Removes the last character of a string until it no longer ends in '0'.
         module procedure remove_trailing_zeros_c
         module procedure remove_trailing_zeros_s
     end interface
 
     interface split_at
+        !! Finds the positions of all characters within `string` that
+        !! are in `split_characters` and returns the characters between each
+        !! position, including the beginning and ending of `string`, as
+        !! elements of an array of strings.
         module procedure split_at_cc
         module procedure split_at_cs
         module procedure split_at_sc
@@ -138,6 +177,7 @@ module strff
     end interface
 
     interface to_string
+        !! Converts intrinsic type values into string representations.
         module procedure to_string_int8
         module procedure to_string_int16
         module procedure to_string_int32
@@ -150,16 +190,23 @@ module strff
     end interface
 
     interface without_first_character
+        !! Returns the string with the first character removed.
+        !!
+        !! **NOTE:** The argument must not have zero length.
         module procedure without_first_character_c
         module procedure without_first_character_s
     end interface
 
     interface without_last_character
+        !! Returns the string with the last character removed.
+        !!
+        !! **NOTE:** The argument must not have zero length.
         module procedure without_last_character_c
         module procedure without_last_character_s
     end interface
 
     character(len=*), parameter :: NEWLINE = NEW_LINE('A')
+            !! The character that separates lines in a file
 contains
     elemental function add_hanging_indentation_c(string, spaces) result(indented)
         character(len=*), intent(in) :: string
