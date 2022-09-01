@@ -9,7 +9,7 @@ if(NOT TARGET "iso_varying_string")
     FetchContent_Declare(
       "iso_varying_string"
       GIT_REPOSITORY "${iso_varying_string-url}"
-      GIT_TAG "v3.0.1"
+      GIT_TAG "v4.0.0"
     )
     FetchContent_MakeAvailable("iso_varying_string")
   endif()
