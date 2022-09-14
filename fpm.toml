@@ -1,12 +1,12 @@
 name = "strff"
-version = "3.1.0"
+version = "3.1.1"
 license = "MIT"
 author = "Brad Richardson"
 maintainer = "everythingfunctional@protonmail.com"
 copyright = "2020 Brad Richardson"
 
 [dependencies]
-iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string.git", tag = "v4.0.0" }
+iso_varying_string = { git = "https://gitlab.com/everythingfunctional/iso_varying_string.git", tag = "v3.0.3" }
 
 [dev-dependencies]
 veggies = { git = "https://gitlab.com/everythingfunctional/veggies.git", tag = "v1.0.3" }
