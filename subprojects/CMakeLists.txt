@@ -19,4 +19,27 @@ list(
   APPEND lib-deps
   "iso_varying_string"
 )
+
+# Include the exceptional_numbers project
+if(NOT TARGET "exceptional_numbers")
+  if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/exceptional_numbers/CMakeLists.txt)
+    add_subdirectory("exceptional_numbers")
+  else()
+    set("exceptional_numbers-url" "https://gitlab.com/everythingfunctional/exceptional_numbers")
+    message(STATUS "Retrieving exceptional_numbers from ${exceptional_numbers-url}")
+    include(FetchContent)
+    FetchContent_Declare(
+      "exceptional_numbers"
+      GIT_REPOSITORY "${exceptional_numbers-url}"
+      GIT_TAG "v0.1.1"
+    )
+    FetchContent_MakeAvailable("exceptional_numbers")
+  endif()
+endif()
+
+list(
+  APPEND lib-deps
+  "exceptional_numbers"
+)
+
 set(lib-deps "${lib-deps}" PARENT_SCOPE)

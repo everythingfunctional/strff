@@ -1,6 +1,7 @@
 module strff
     !! This module defines a library of string functions not available as
     !! intrinsics, but which are generally available in other languages.
+    use exceptional_numbers, only: is_infinity, is_nan, is_negative, is_zero
     use iso_fortran_env, only: &
             INT8, INT16, INT32, INT64, REAL32, REAL64, IOSTAT_END
     use iso_varying_string, only: &
@@ -26,10 +27,6 @@ module strff
             format_hanging_indented, &
             includes, &
             indent, &
-            is_infinity, &
-            is_nan, &
-            is_negative, &
-            is_zero, &
             join, &
             last_character, &
             read_file, &
@@ -103,30 +100,6 @@ module strff
         !! Add `spaces` number of blanks to the beginning of each line of a string
         module procedure indent_c
         module procedure indent_s
-    end interface
-
-    interface is_infinity
-        !! Is the given number Inf or -Inf?
-        module procedure is_infinity_real32
-        module procedure is_infinity_real64
-    end interface
-
-    interface is_nan
-        !! Is the given number NaN
-        module procedure is_nan_real32
-        module procedure is_nan_real64
-    end interface
-
-    interface is_negative
-        !! Is the given number negative?
-        module procedure is_negative_real32
-        module procedure is_negative_real64
-    end interface
-
-    interface is_zero
-        !! Is the given number exactly 0.0 or -0.0?
-        module procedure is_zero_real32
-        module procedure is_zero_real64
     end interface
 
     interface join
@@ -828,93 +801,5 @@ contains
         type(varying_string) :: trimmed
 
         trimmed = without_last_character(char(string))
-    end function
-
-    elemental function is_infinity_real32(val) result(is_infinity)
-        real(REAL32), intent(in) :: val
-        logical :: is_infinity
-
-
-        if (is_nan(val)) then
-            is_infinity = .false.
-        else
-            ! This isn't quite right. It is conceivable for a processor
-            ! to have numbers greater than huge that aren't considered infinity,
-            ! but for now I don't know of a reliable way to test for that
-            is_infinity = val < -huge(val) .or. val > huge(val)
-        end if
-    end function
-
-    elemental function is_infinity_real64(val) result(is_infinity)
-        real(REAL64), intent(in) :: val
-        logical :: is_infinity
-
-
-        if (is_nan(val)) then
-            is_infinity = .false.
-        else
-            ! This isn't quite right. It is conceivable for a processor
-            ! to have numbers greater than huge that aren't considered infinity,
-            ! but for now I don't know of a reliable way to test for that
-            is_infinity = val < -huge(val) .or. val > huge(val)
-        end if
-    end function
-
-    elemental function is_nan_real32(val) result(is_nan)
-        real(REAL32), intent(in) :: val
-        logical :: is_nan
-
-        is_nan = .not.(val >= 0 .or. val <= 0)
-    end function
-
-    elemental function is_nan_real64(val) result(is_nan)
-        real(REAL64), intent(in) :: val
-        logical :: is_nan
-
-        is_nan = .not.(val >= 0 .or. val <= 0)
-    end function
-
-    elemental function is_negative_real32(val) result(is_negative)
-        real(REAL32), intent(in) :: val
-        logical :: is_negative
-
-        if (is_nan(val)) then
-            is_negative = .false.
-        else
-            is_negative = sign(1.0_real32, val) < 0
-        end if
-    end function
-
-    elemental function is_negative_real64(val) result(is_negative)
-        real(REAL64), intent(in) :: val
-        logical :: is_negative
-
-        if (is_nan(val)) then
-            is_negative = .false.
-        else
-            is_negative = sign(1.0_real64, val) < 0
-        end if
-    end function
-
-    elemental function is_zero_real32(val) result(is_zero)
-        real(REAL32), intent(in) :: val
-        logical :: is_zero
-
-        if (is_nan(val)) then
-            is_zero = .false.
-        else
-            is_zero = .not. (val > 0 .or. val < 0)
-        end if
-    end function
-
-    elemental function is_zero_real64(val) result(is_zero)
-        real(REAL64), intent(in) :: val
-        logical :: is_zero
-
-        if (is_nan(val)) then
-            is_zero = .false.
-        else
-            is_zero = .not. (val > 0 .or. val < 0)
-        end if
     end function
 end module
